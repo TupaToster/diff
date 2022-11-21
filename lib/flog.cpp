@@ -1,4 +1,3 @@
-#pragma once
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #pragma GCC diagnostic ignored "-Wformat="
 #pragma GCC diagnostic ignored "-Wsign-compare"
@@ -20,6 +19,7 @@ FILE* logOutf = NULL;
 // j - int
 // y - long long
 // h - char
+
 
 void flogIntern (const void* val, const char* varType, const char* varName, size_t varSize, const char* fileName, const char* funcName, size_t line) {
 
