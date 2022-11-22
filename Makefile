@@ -4,7 +4,7 @@ CFLAGS+=-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equa
 
 OBJ+=main.o lib/flog.o funcs.o
 
-HEADERS= lib/flog.h lib/tree.h protos.h
+HEADERS= lib/flog.h lib/tree.h protos.h lib/stack.h
 
 all: $(HEADERS)
 	make a.exe

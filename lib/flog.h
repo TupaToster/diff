@@ -19,6 +19,7 @@ void flogIntern (const void* val, const char* varType, const char* varName, size
                 fprintf (logOutf, "----------------------------------------<br>"                    \
                 "Logging session at compiled time : %s %s<br><br>", __TIME__, __DATE__);             \
             }                                                                                     \
+            fprintf (logOutf, "In file %s, function %s, line %u : %s = ", __FILE__, __FUNCTION__, __LINE__, #a);\
             flogIntern (&a, typeid (a).name (), #a, sizeof (a), __FILE__, __FUNCTION__, __LINE__);}
 
 #define flogprintf(...) {                                                                          \

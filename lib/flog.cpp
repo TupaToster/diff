@@ -23,7 +23,7 @@ FILE* logOutf = NULL;
 
 void flogIntern (const void* val, const char* varType, const char* varName, size_t varSize, const char* fileName, const char* funcName, size_t line) {
 
-    fprintf (logOutf, "In file %s, function %s, line %u : %s = ", fileName, funcName, line, varName);
+    //fprintf (logOutf, "In file %s, function %s, line %u : %s = ", fileName, funcName, line, varName);
 
 
     if (!strcmp (varType, "Pc") or !strcmp (varType, "PKc")) fprintf (logOutf, "<%s>", *((const char**) val));

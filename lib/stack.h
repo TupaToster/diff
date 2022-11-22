@@ -9,30 +9,9 @@
 #define dump(clas) ;
 #endif
 
-enum NodType {
-
-    BLANK = 0,
-    CONSTANT = 1,
-    VARIABLE = 2,
-    PLUS     = 3,
-    MINUS    = 4,
-    MULT = 5,
-    DIV  = 6,
-    POWER = 7
-};
-
-struct Nod {
-
-    Nod*    prev    = NULL;
-    NodType type    = BLANK;
-    double  val     = 0;
-    int     NodNum  = 0;
-    Nod*    left    = NULL;
-    Nod*    right   = NULL;
-};
 
 template<typename ELEM_T>
-class Tree {
+class Stack {
 
     //constants
     static constexpr unsigned int       CANL      = 0xDEADBEEF; ///< Left cannary of a structure
@@ -64,6 +43,8 @@ class Tree {
     unsigned int   canL      = CANL; ///< left cannary of struct
     unsigned int   hash      = 0;    ///< hash value
     size_t         errCode   = ok;   ///< error code
+    unsigned int   size      = 0;
+    unsigned int   capacity  = 0;
     ELEM_T*        data      = NULL; ///< Ptr to data
     unsigned int*  dataCanL  = NULL; ///< left cannary of data
     unsigned int*  dataCanR  = NULL; ///< right cannary of data
@@ -80,18 +61,20 @@ class Tree {
         return errCode;
     }
 
-    Tree () {
+    Stack () {
 
         canL      = CANL;
         canR      = CANR;
         hash      = 0;
         errCode   = ok;
+        size      = 0;
+        capacity  = 4;
 
-        dataCanL = (unsigned int*) calloc (sizeof (ELEM_T) + 2 * sizeof (unsigned int), 1);
-        assert (dataCanL != NULL);
-        data = NodCtor (NULL, BLANK, 0, NULL, NULL, (ELEM_T*) (dataCanL + 1));
+        data     = (ELEM_T*) calloc (capacity * sizeof (ELEM_T) + 2 * sizeof (unsigned int), 1);
         assert (data != NULL);
-        dataCanR = (unsigned int*) (data + 1);
+        dataCanL = (unsigned int*) data;
+        data     = (ELEM_T*)(((unsigned int*) data) + 1);
+        dataCanR = (unsigned int*) (data + capacity);
 
        *dataCanL = CANL;
        *dataCanR = CANR;
@@ -116,8 +99,6 @@ class Tree {
         countHashSeg ((char*) &canL, (char*) &canR, &multiplier);
 
         if (dataCanL != NULL) countHashSeg ((char*) dataCanL, (char*) dataCanR, &multiplier);
-
-        DataCountHash (&multiplier);
 
         return hash;
     }
@@ -185,7 +166,7 @@ class Tree {
 
         verifyHash ();
 
-        flogprintf ( "In file %s, function %s, line %llu, Tree named %s was dumped : <br>", fileName, funcName, line, varName);
+        flogprintf ( "In file %s, function %s, line %llu, Stack named %s was dumped : <br>", fileName, funcName, line, varName);
 
         flogprintf ( "\t" "Errors : <br>");
 
@@ -207,6 +188,14 @@ class Tree {
         else if ( canR      == CANR   ) flogprintf ( "ok)<br>")
         else                            flogprintf ( "NOT_OK)<br>")
 
+                                        flogprintf ("\t" "size = %u (", size);
+        if      ( isPoison (size)     ) flogprintf ("POISONED)<br>")
+        else                            flogprintf ("ok)<br>")
+
+                                        flogprintf ("\t" "capacity = %u (", capacity);
+        if      ( isPoison (capacity) ) flogprintf ("POISONED)<br>")
+        else                            flogprintf ("ok)<br>")
+
                                         flogprintf ( "\t" "dataCanL = 0x%X (", *dataCanL);
         if      (isPoison (*dataCanL))  flogprintf ( "POISONED)<br>")
         else if (*dataCanL == CANL   )  flogprintf ( "ok)<br>")
@@ -217,11 +206,18 @@ class Tree {
         else if (*dataCanR == CANR   )  flogprintf ( "ok)<br>")
         else                            flogprintf ( "NOT_OK)<br>")
 
-        if (!isPoison (data) and data != NULL) {
+        if (!isPoison (data) and data != NULL and size != 0) {
 
-            TreeGraphDump ();
+            flogprintf ("\t" "%s.stack : <br>", varName);
+            for (int i = 0; i < capacity; i++) {
+
+                flogprintf ("\t\t" "%s.data[%d] : " , varName, i);   //%u -> Stack Elem_t Format
+                flogIntern (&data[i], typeid (ELEM_T).name (), NULL, sizeof (ELEM_T), NULL, NULL, 0);
+                if (isPoison (data[i])) flogprintf ("^^(POISONED)^^<br>");
+            }
         }
 
+        flogprintf ("\t" "End of stack" "<br>" "End of dump <br>");
         countHash ();
     }
 
@@ -251,13 +247,15 @@ class Tree {
     size_t errCheck () {
 
         //checking for poison
+        verifyHash ();
+
         if (isPoison ( errCode  )   ) {
 
             errCode = POISONED_ERRCOD;
+            countHash ();
             return errCode;
         }
 
-        verifyHash ();
 
         if (isPoison ( canL     ) or
             isPoison ( canR     ) or
@@ -277,6 +275,7 @@ class Tree {
         if ( dataCanR == NULL      ) errCode |= NULL_data_CAN_R_PTR;
         else if (*dataCanR != CANR ) errCode |= BAD_data_CAN_R;
         if ( data     == NULL      ) errCode |= NULL_data_PTR;
+        if ( size > capacity       ) errCode |= WRONG_SIZE;
 
         countHash ();
 
@@ -292,158 +291,76 @@ class Tree {
         setPoison (&dataCanR  );
         setPoison (&errCode   );
         setPoison (&hash      );
+        setPoison (&size      );
 
-        NodDtorRec ();
+        for (int i = 0; i < capacity;i++) setPoison (data[i]);
+        setPoison (&capacity  );
 
-        free      (dataCanL );
-        setPoison (&data     );
+        free      (dataCanL   );
+        setPoison (&data      );
     }
 
-    //Nod part PART
+    //Stack only part
 
-    ELEM_T* NodCtor (ELEM_T* prev = NULL, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL, ELEM_T* current = NULL) {
+    void push (ELEM_T val) {
 
-        ELEM_T* retVal = (current == NULL ? (ELEM_T*) calloc (1, sizeof (ELEM_T)) : current);
-        assert (retVal != NULL);
+        errCheck ();
 
-        retVal->prev    = prev;
-        retVal->NodType = NodType;
-        retVal->val     = val;
-        retVal->left    = left;
-        retVal->right   = right;
+        if (size == capacity) reallocSizeShift (1);
+
+        data[size] = val;
+        size++;
+
+        errCheck ();
+    }
+
+    ELEM_T pop () {
+
+        errCheck ();
+
+        if (size == 0) return 0;
+        ELEM_T retVal = data[size - 1];
+        data[size-1] = 0;
+        size--;
+
+        countHash ();
+
+        if (capacity > 4 and size == capacity * 3 / 8) reallocSizeShift (-1);
+
+        errCheck ();
+
         return retVal;
     }
 
-    void NodDtorRec (ELEM_T* iter = NULL) {
+    void reallocSizeShift (int delta) {
 
-        if (iter == NULL) return;
+        errCheck ();
 
-        setPoison      (&iter->prev   );
-        setPoison      (&iter->NodType);
-        setPoison      (&iter->val    );
-        NodDtorRec     ( iter->left   );
-        NodDtorRec     ( iter->right  );
-        setPoison      (&iter->left   );
-        setPoison      (&iter->right  );
-        free           ( iter         );
-    }
+        *((unsigned int*) (data + capacity)) = 0;
 
-    void DataCountHash (unsigned int* multiplier, ELEM_T* iter = NULL) {
+        if (delta > 0) {
 
-        if (iter == NULL) return;
-        countHashSeg ((char*) iter->prev, (char*) iter->right, multiplier);
-        DataCountHash (multiplier, iter->left);
-        DataCountHash (multiplier, iter->right);
-    }
+            data = (ELEM_T*) calloc (capacity * sizeof (ELEM_T) * 2 + 2 * sizeof (unsigned int), 1);
+            memcpy (data, dataCanL, capacity * sizeof (ELEM_T) + 2 * sizeof (unsigned int)); //3  2
+            capacity *= 2;
 
-    void NodAddRight (ELEM_T* iter = NULL, char NodType = 0, double val = 0, const char* f = NULL, ELEM_T* left = NULL, ELEM_T* right = NULL) {
-
-        if (iter->right != NULL) return;
-
-        iter->right = NodCtor (iter, NodType, val, f, left, right);
-    }
-
-    void NodAddLeft (ELEM_T* iter = NULL, char NodType = 0, double val = 0, const char* f = NULL, ELEM_T* left = NULL, ELEM_T* right = NULL) {
-
-        if (iter->left != NULL) return;
-
-        iter->left = NodCtor (iter, NodType, val, f, left, right);
-    }
-
-    void PrintNod (ELEM_T* nod, int* NodNumber, int depth, FILE* picSource, int ranks[][MAX_RANKS + 1]) {
-
-        #define picprintf(...) fprintf (picSource, __VA_ARGS__)
-
-        nod->NodNum = *NodNumber;
-        ranks[depth][0]++;
-        ranks[depth][ranks[depth][0]] = *NodNumber;
-
-        picprintf ("\t" "\"Nod_%d\" [shape = \"Mrecord\", style = \"filled\", fillcolor = \"#9feb83\", label = \"{ <prev> Prev = %p | Current = %p | NodType = %hhd | Value = %f | Function = \\\"%s\\\" |{ <left> Left = %p | <right> Right = %p} }\"]\n",
-                    *NodNumber, nod->prev, nod, nod->NodType, nod->val, nod->f == NULL ? "" : nod->f, nod->left, nod->right);
-
-        *NodNumber += 1;
-        if (nod->left != NULL) {
-
-            PrintNod(nod->left, NodNumber, depth + 1, picSource, ranks);
         }
-        if (nod->right != NULL) {
+        else if (delta < 0) {
 
-            PrintNod (nod->right, NodNumber, depth + 1, picSource, ranks);
+            data = (ELEM_T*) calloc (capacity * sizeof (ELEM_T) / 2  + 2 * sizeof (unsigned int), 1);
+            memcpy (data, dataCanL, capacity * sizeof (ELEM_T) / 2 + 2 * sizeof (unsigned int));
+            capacity /= 2;
         }
 
-        #undef picprintf
+        free (dataCanL);
+
+        dataCanL = (unsigned int*) data;
+
+        data = (ELEM_T*) (((unsigned int*) data) + 1);
+
+        dataCanR = (unsigned int*) (data + capacity); //найдена ошибка
+        *dataCanR = CANR;
+
+        errCheck ();
     }
-
-    void PrintConnections (ELEM_T* nod, FILE* picSource) {
-
-        #define picprintf(...) fprintf (picSource, __VA_ARGS__)
-
-        if (nod->left != NULL) {
-
-            picprintf ("\t" "\"Nod_%d\":left -> \"Nod_%d\";\n", nod->NodNum, nod->left->NodNum);
-            PrintConnections (nod->left, picSource);
-        }
-        if (nod->right != NULL) {
-
-            picprintf ("\t" "\"Nod_%d\":right -> \"Nod_%d\";\n", nod->NodNum, nod->right->NodNum);
-            PrintConnections (nod->right, picSource);
-        }
-
-        #undef picprintf
-    }
-
-    void TreeGraphDump () {
-
-        static int GraphDumpCounter = 0;
-
-        #define picprintf(...) fprintf (picSource, __VA_ARGS__)
-
-        char srcName[] = "GraphDumpSrc.dot";
-        char picName[30] = "GraphDumpPic";
-        sprintf (picName, "%d.png", GraphDumpCounter);
-
-        FILE* picSource = fopen (srcName, "w");
-        assert (picSource != NULL);
-
-        picprintf ("digraph List_%d {" "\n", GraphDumpCounter);
-        picprintf ("\t" "graph [dpi = 300];" "\n");
-        picprintf ("\t" "rankdir = TB" "\n");
-
-        int ranks[MAX_RANKS][MAX_RANKS + 1] = {0};
-        int NodNum = 0;
-        PrintNod (data, &NodNum, 0, picSource, ranks);
-
-        for (int i = 0; i < MAX_RANKS and ranks[i][0] != 0; i++) {
-
-            picprintf ("\t" "{ rank = same; ");
-
-            for (int j = 1; j <= ranks[i][0];j++) {
-
-                picprintf (" Nod_%d; ", ranks[i][j]);
-            }
-
-            picprintf ("}\n");
-        }
-
-        PrintConnections (data, picSource);
-
-        picprintf ( "}");
-
-        fclose (picSource);
-
-        char command[200] = "";
-        sprintf (command, "D:\\Graphviz\\bin\\dot.exe -Tpng %s -o %s", srcName, picName);
-
-        system (command);
-
-        flogprintf("<pre>\n");
-        flogprintf("<h2>Tree dump</h2>\n");
-        flogprintf("<img src = \"%s\" style = \"width: 55%%; height: auto\"/>\n", picName);
-        flogprintf("<hr>\n");
-
-        GraphDumpCounter++;
-
-        #undef picprintf
-    }
-
 };
