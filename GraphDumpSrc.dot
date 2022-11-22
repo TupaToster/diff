@@ -1,0 +1,14 @@
+digraph List_0 {
+	graph [dpi = 300];
+	rankdir = TB
+	"Nod_0" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000000000000000 | Current = 000001f76ec11634 | NodType = 0 | Value = 0.000000 | Function = \"\" |{ <left> Left = 000001f76ec11680 | <right> Right = 000001f76ec116c0} }"]
+	"Nod_1" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000001f76ec11634 | Current = 000001f76ec11680 | NodType = 0 | Value = 0.000000 | Function = \"\" |{ <left> Left = 000001f76ec11700 | <right> Right = 0000000000000000} }"]
+	"Nod_2" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000001f76ec11680 | Current = 000001f76ec11700 | NodType = 0 | Value = 0.000000 | Function = \"\" |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_3" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000001f76ec11634 | Current = 000001f76ec116c0 | NodType = 0 | Value = 0.000000 | Function = \"\" |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	{ rank = same;  Nod_0; }
+	{ rank = same;  Nod_1;  Nod_3; }
+	{ rank = same;  Nod_2; }
+	"Nod_0":left -> "Nod_1";
+	"Nod_1":left -> "Nod_2";
+	"Nod_0":right -> "Nod_3";
+}

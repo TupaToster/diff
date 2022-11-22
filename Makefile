@@ -4,7 +4,10 @@ CFLAGS+=-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equa
 
 OBJ+=main.o lib/flog.o
 
-all: a.exe protos.h
+HEADERS= lib/flog.h lib/tree.h protos.h
+
+all: $(HEADERS)
+	make a.exe
 
 a.exe: $(OBJ)
 	$(CC) $(OBJ) $(CFLAGS) -o a.exe
@@ -13,5 +16,13 @@ a.exe: $(OBJ)
 	$(CC) $(CFLAGS) *.cpp -c
 
 clean:
+	rm -rf *.o *.exe*
+	rm -rf *png
 	rm -rf */*.o */*.exe*
 	clear
+
+run:
+	make
+	./a
+
+.PHONY: clean run

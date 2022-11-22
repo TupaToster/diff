@@ -34,7 +34,6 @@ class SafeClass {
     static constexpr unsigned long long POISON8   = 0xBADC0FEEF04DED32; ///< 8 byte Poison
     static constexpr unsigned int       MULT      = 37u; ///< Multiplier for hash
     static constexpr unsigned int       MAX_RANKS = 100;
-
     /// @brief Describes errors within NEW_STRUCT
     enum errorCodes {
         ok                   = 0,    ///< All ok
@@ -75,9 +74,9 @@ class SafeClass {
         hash      = 0;
         errCode   = ok;
 
-        dataCanL = (unsigned int*) calloc (sizeof (ELEM_T*) + 2 * sizeof (unsigned int), 1);
+        dataCanL = (unsigned int*) calloc (sizeof (ELEM_T) + 2 * sizeof (unsigned int), 1);
         assert (dataCanL != NULL);
-        data = ELEM_T_Ctor (NULL, 0, 0, NULL, NULL, NULL, (ELEM_T*) (dataCanL + 1));
+        data = NodCtor (NULL, 0, 0, NULL, NULL, NULL, (ELEM_T*) (dataCanL + 1));
         assert (data != NULL);
         dataCanR = (unsigned int*) (data + 1);
 
@@ -173,43 +172,42 @@ class SafeClass {
 
         verifyHash ();
 
-        flogprintf ( "In file %s, function %s, line %u, SafeClass named %s was dumped : \n", fileName, funcName, line, varName);
+        flogprintf ( "In file %s, function %s, line %llu, SafeClass named %s was dumped : <br>", fileName, funcName, line, varName);
 
-        flogprintf ( "\t" "Errors : \n");
+        flogprintf ( "\t" "Errors : <br>");
 
         ErrCheck ();
 
         LogPrintErrors ();
 
                                         flogprintf ( "\t" "hash = %u (", hash);
-        if      ( isPoison (hash)     ) flogprintf ( "POISONED)\n")
-        else                            flogprintf ( "ok)\n")
+        if      ( isPoison (hash)     ) flogprintf ( "POISONED)<br>")
+        else                            flogprintf ( "ok)<br>")
 
                                         flogprintf ( "\t" "canL = 0x%X (", canL);
-        if      ( isPoison (canL)     ) flogprintf ( "POISONED)\n")
-        else if ( canL      == CANL   ) flogprintf ( "ok)\n")
-        else                            flogprintf ( "NOT_OK)\n")
+        if      ( isPoison (canL)     ) flogprintf ( "POISONED)<br>")
+        else if ( canL      == CANL   ) flogprintf ( "ok)<br>")
+        else                            flogprintf ( "NOT_OK)<br>")
 
                                         flogprintf ( "\t" "canR = 0x%X (", canR);
-        if      ( isPoison (canR)     ) flogprintf ( "POISONED)\n")
-        else if ( canR      == CANR   ) flogprintf ( "ok)\n")
-        else                            flogprintf ( "NOT_OK)\n")
+        if      ( isPoison (canR)     ) flogprintf ( "POISONED)<br>")
+        else if ( canR      == CANR   ) flogprintf ( "ok)<br>")
+        else                            flogprintf ( "NOT_OK)<br>")
 
                                         flogprintf ( "\t" "dataCanL = 0x%X (", *dataCanL);
-        if      (isPoison (*dataCanL))  flogprintf ( "POISONED)\n")
-        else if (*dataCanL == CANL   )  flogprintf ( "ok)\n")
-        else                            flogprintf ( "NOT_OK)\n")
+        if      (isPoison (*dataCanL))  flogprintf ( "POISONED)<br>")
+        else if (*dataCanL == CANL   )  flogprintf ( "ok)<br>")
+        else                            flogprintf ( "NOT_OK)<br>")
 
                                         flogprintf ( "\t" "dataCanR = 0x%X (", *dataCanR);
-        if      (isPoison (*dataCanR))  flogprintf ( "POISONED)\n")
-        else if (*dataCanR == CANR   )  flogprintf ( "ok)\n")
-        else                            flogprintf ( "NOT_OK)\n")
+        if      (isPoison (*dataCanR))  flogprintf ( "POISONED)<br>")
+        else if (*dataCanR == CANR   )  flogprintf ( "ok)<br>")
+        else                            flogprintf ( "NOT_OK)<br>")
 
         if (!isPoison (data) and data != NULL) {
 
-            SafeClassGraphicDump ();
+            TreeGraphDump ();
         }
-        flogprintf ( "\t" "End of data" "\n" "End of dump \n");
 
         CountHash ();
     }
@@ -220,18 +218,18 @@ class SafeClass {
 
         char names [11][40] = {};
         int iter = 0;
-        if (errCode & POISON_ACCESS        ) strcpy (names[iter++], "\t\t[POISON_ACCESS       ]\n");
-        if (errCode & BAD_CAN_L            ) strcpy (names[iter++], "\t\t[BAD_CAN_L           ]\n");
-        if (errCode & BAD_CAN_R            ) strcpy (names[iter++], "\t\t[BAD_CAN_R           ]\n");
-        if (errCode & BAD_data_CAN_L       ) strcpy (names[iter++], "\t\t[BAD_data_CAN_L      ]\n");
-        if (errCode & BAD_data_CAN_R       ) strcpy (names[iter++], "\t\t[BAD_data_CAN_R      ]\n");
-        if (errCode & NULL_data_PTR        ) strcpy (names[iter++], "\t\t[NULL_data_PTR       ]\n");
-        if (errCode & NULL_data_CAN_L_PTR  ) strcpy (names[iter++], "\t\t[NULL_data_CAN_L_PTR ]\n");
-        if (errCode & NULL_data_CAN_R_PTR  ) strcpy (names[iter++], "\t\t[NULL_data_CAN_R_PTR ]\n");
-        if (errCode & POISONED_ERRCOD      ) strcpy (names[iter++], "\t\t[POISONED_ERRCOD     ]\n");
-        if (errCode & WRONG_HASH           ) strcpy (names[iter++], "\t\t[WRONG_HASH          ]\n");
+        if (errCode & POISON_ACCESS        ) strcpy (names[iter++], "\t\t[POISON_ACCESS       ]<br>");
+        if (errCode & BAD_CAN_L            ) strcpy (names[iter++], "\t\t[BAD_CAN_L           ]<br>");
+        if (errCode & BAD_CAN_R            ) strcpy (names[iter++], "\t\t[BAD_CAN_R           ]<br>");
+        if (errCode & BAD_data_CAN_L       ) strcpy (names[iter++], "\t\t[BAD_data_CAN_L      ]<br>");
+        if (errCode & BAD_data_CAN_R       ) strcpy (names[iter++], "\t\t[BAD_data_CAN_R      ]<br>");
+        if (errCode & NULL_data_PTR        ) strcpy (names[iter++], "\t\t[NULL_data_PTR       ]<br>");
+        if (errCode & NULL_data_CAN_L_PTR  ) strcpy (names[iter++], "\t\t[NULL_data_CAN_L_PTR ]<br>");
+        if (errCode & NULL_data_CAN_R_PTR  ) strcpy (names[iter++], "\t\t[NULL_data_CAN_R_PTR ]<br>");
+        if (errCode & POISONED_ERRCOD      ) strcpy (names[iter++], "\t\t[POISONED_ERRCOD     ]<br>");
+        if (errCode & WRONG_HASH           ) strcpy (names[iter++], "\t\t[WRONG_HASH          ]<br>");
 
-        if (iter == 0) flogprintf ( "\t\t[ok]\n")
+        if (iter == 0) flogprintf ( "\t\t[ok]<br>")
         else
             for (int i = 0; i < iter; i++) flogprintf ( "%s", names[i])
 
@@ -282,15 +280,15 @@ class SafeClass {
         setPoison (&errCode   );
         setPoison (&hash      );
 
-        ELEM_T_DtorRec ();
+        NodDtorRec ();
 
         free      (dataCanL );
         setPoison (&data     );
     }
 
-    //SafeClass PART
+    //Nod part PART
 
-    ELEM_T* ELEM_T_Ctor (ELEM_T* prev = NULL, char NodType = 0, double val = 0, const char* f = NULL, ELEM_T* left = NULL, ELEM_T* right = NULL, ELEM_T* current = NULL) {
+    ELEM_T* NodCtor (ELEM_T* prev = NULL, char NodType = 0, double val = 0, const char* f = NULL, ELEM_T* left = NULL, ELEM_T* right = NULL, ELEM_T* current = NULL) {
 
         ELEM_T* retVal = (current == NULL ? (ELEM_T*) calloc (1, sizeof (ELEM_T)) : current);
         assert (retVal != NULL);
@@ -304,7 +302,7 @@ class SafeClass {
         return retVal;
     }
 
-    void ELEM_T_DtorRec (ELEM_T* iter = getdata()) {
+    void NodDtorRec (ELEM_T* iter = NULL) {
 
         if (iter == NULL) return;
 
@@ -313,33 +311,33 @@ class SafeClass {
         setPoison      (&iter->val    );
         free           ( iter->f      );
         setPoison      (&iter->f      );
-        ELEM_T_DtorRec ( iter->left   );
-        ELEM_T_DtorRec ( iter->right  );
+        NodDtorRec ( iter->left   );
+        NodDtorRec ( iter->right  );
         setPoison      (&iter->left   );
         setPoison      (&iter->right  );
         free           ( iter         );
     }
 
-    void DataCountHash (unsigned int* multiplier, ELEM_T* iter = data) {
+    void DataCountHash (unsigned int* multiplier, ELEM_T* iter = NULL) {
 
-        if (data == NULL) return;
+        if (iter == NULL) return;
         CountHashSeg ((char*) iter->prev, (char*) iter->right, multiplier);
         DataCountHash (multiplier, iter->left);
         DataCountHash (multiplier, iter->right);
     }
 
-    void NodAddRight (ELEM_T* iter = data, char NodType = 0, double val = 0, const char* f = NULL, ELEM_T* left = NULL, ELEM_T* right = NULL) {
+    void NodAddRight (ELEM_T* iter = NULL, char NodType = 0, double val = 0, const char* f = NULL, ELEM_T* left = NULL, ELEM_T* right = NULL) {
 
         if (iter->right != NULL) return;
 
-        iter->right = ELEM_T_Ctor (iter, NodType, val, f, left, right);
+        iter->right = NodCtor (iter, NodType, val, f, left, right);
     }
 
-    void NodAddLeft (ELEM_T* iter = data, char NodType = 0, double val = 0, const char* f = NULL, ELEM_T* left = NULL, ELEM_T* right = NULL) {
+    void NodAddLeft (ELEM_T* iter = NULL, char NodType = 0, double val = 0, const char* f = NULL, ELEM_T* left = NULL, ELEM_T* right = NULL) {
 
         if (iter->left != NULL) return;
 
-        iter->left = ELEM_T_Ctor (iter, NodType, val, f, left, right);
+        iter->left = NodCtor (iter, NodType, val, f, left, right);
     }
 
     void PrintNod (ELEM_T* nod, int* NodNumber, int depth, FILE* picSource, int ranks[][MAX_RANKS + 1]) {
@@ -350,7 +348,7 @@ class SafeClass {
         ranks[depth][0]++;
         ranks[depth][ranks[depth][0]] = *NodNumber;
 
-        picprintf ("\t" "\"Nod_%d\" [shape = \"Mrecord\", style = \"filled\", fillcolor = \"#9feb83\", label = \"{ <prev> Prev = %p | Current = %p | NodType = %hhd | Value = %Lf | Function = \"%s\" |{ <left> Left = %p | <right> Right = %p} }\"]\n",
+        picprintf ("\t" "\"Nod_%d\" [shape = \"Mrecord\", style = \"filled\", fillcolor = \"#9feb83\", label = \"{ <prev> Prev = %p | Current = %p | NodType = %hhd | Value = %f | Function = \\\"%s\\\" |{ <left> Left = %p | <right> Right = %p} }\"]\n",
                     *NodNumber, nod->prev, nod, nod->NodType, nod->val, nod->f == NULL ? "" : nod->f, nod->left, nod->right);
 
         *NodNumber += 1;
@@ -384,7 +382,7 @@ class SafeClass {
         #undef picprintf
     }
 
-    void SafeClassGraphicDump () {
+    void TreeGraphDump () {
 
         static int GraphDumpCounter = 0;
 

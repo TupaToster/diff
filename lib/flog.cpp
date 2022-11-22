@@ -41,5 +41,5 @@ void flogIntern (const void* val, const char* varType, const char* varName, size
         for (int i = 0; i < varSize; i++) fprintf (logOutf, "%hhX", *((char*) val + i));
         fprintf (logOutf, " :: UNDEFINED_FORMAT : sizeof() = %u", varSize);
     }
-    fprintf (logOutf, ";\n");
+    fprintf (logOutf, ";<br>");
 }
