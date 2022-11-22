@@ -6,7 +6,6 @@
 #include <string.h>
 #include <assert.h>
 
-
 // DEFINE NDEBUG TO DISABLE LOGS
 
 extern FILE* logOutf;

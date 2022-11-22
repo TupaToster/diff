@@ -23,8 +23,6 @@ struct Nod {
 template<typename ELEM_T>
 class SafeClass {
 
-    private:
-
     //constants
     static constexpr unsigned int       CANL      = 0xDEADBEEF; ///< Left cannary of a structure
     static constexpr unsigned int       CANR      = 0xD34DB33F; ///< Right cannary of a structure
@@ -65,6 +63,10 @@ class SafeClass {
     ELEM_T* getdata () {
 
         return data;
+    }
+
+    unsigned int geterrCode () {
+        return errCode;
     }
 
     SafeClass () {
