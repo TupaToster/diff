@@ -2,12 +2,18 @@ CC=g++
 
 CFLAGS+=-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wempty-body -Wformat-security -Wformat=2 -Wignored-qualifiers -Wlogical-op -Wmissing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings -D_DEBUG -D_EJUDGE_CLIENT_SIDE
 
-OBJ+=main.o lib/flog.o diff/diff.o
+SRCS=main.cpp lib/flog.cpp diff/diff.cpp
 
-HEADERS= lib/flog.h lib/tree.h protos.h lib/stack.h
+OBJ=$(SRCS:.cpp=.o)
 
-all: $(HEADERS)
+all: .depend
 	make a.exe
+
+.depend: $(SRCS)
+	rm -rf "$@"
+	$(CC) $(CFLAGS) -MM $^ > "$@"
+
+include .depend
 
 a.exe: $(OBJ)
 	$(CC) $(OBJ) $(CFLAGS) -o a.exe
@@ -25,4 +31,4 @@ run:
 	make
 	./a
 
-.PHONY: clean run
+.PHONY: clean run .depend

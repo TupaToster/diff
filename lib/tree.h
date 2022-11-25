@@ -1,4 +1,5 @@
 #pragma once
+#pragma GCC diagnostic ignored "-Wmultichar"
 #include <stdio.h>
 #include <stdlib.h>
 #include "flog.h"
@@ -9,16 +10,21 @@
 #define dump(clas) ;
 #endif
 
+#define pasta(a) #a
+
+// ADD = 'NUM' = 256**2 * 'M' + 256 * 'U' + 'N', вывод через %.4s
+
+
 enum NodType {
 
-    BLANK    = 1,
-    CONSTANT = 2,
-    X        = 3,
-    PLUS     = 4,
-    MINUS    = 5,
-    MULT     = 6,
-    DIV      = 7,
-    POWER    = 8
+    BLANK    = 'KNLB',
+    CONSTANT = 'TSNC',
+    X        = 'X',
+    PLUS     = 'SULP',
+    MINUS    = 'NIM',
+    MULT     = 'TLUM',
+    DIV      = 'VID',
+    POWER    = 'WOP',
 };
 
 struct Nod {
@@ -325,13 +331,18 @@ class Tree {
         if (iter == NULL) return;
 
         verifyHash ();
-        setPoison      (&iter->prev   );
         setPoison      (&iter->type   );
         setPoison      (&iter->val    );
         NodDtorRec     ( iter->left   );
         NodDtorRec     ( iter->right  );
-        setPoison      (&iter->left   );
-        setPoison      (&iter->right  );
+        setPoison      (&(iter->left) );
+        setPoison      (&(iter->right));
+        if (iter->prev != NULL) {
+
+            if (iter->prev->left == iter) iter->prev->left = NULL;
+            else iter->prev->right = NULL;
+        }
+        setPoison      (&iter->prev   );
         free           ( iter         );
         countHash ();
     }
@@ -370,8 +381,8 @@ class Tree {
         ranks[depth][0]++;
         ranks[depth][ranks[depth][0]] = *NodNumber;
 
-        picprintf ("\t" "\"Nod_%d\" [shape = \"Mrecord\", style = \"filled\", fillcolor = \"#9feb83\", label = \"{ <prev> Prev = %p | Current = %p | type = %d | Value = %f |{ <left> Left = %p | <right> Right = %p} }\"]\n",
-                    *NodNumber, nod->prev, nod, nod->type, nod->val, nod->left, nod->right);
+        picprintf ("\t" "\"Nod_%d\" [shape = \"Mrecord\", style = \"filled\", fillcolor = \"#9feb83\", label = \"{ <prev> Prev = %p | Current = %p | type = %.4s | Value = %f |{ <left> Left = %p | <right> Right = %p} }\"]\n",
+                    *NodNumber, nod->prev, nod, &nod->type, nod->val, nod->left, nod->right);
 
         *NodNumber += 1;
         if (nod->left != NULL) {
