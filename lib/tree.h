@@ -11,14 +11,14 @@
 
 enum NodType {
 
-    BLANK = 0,
-    CONSTANT = 1,
-    VARIABLE = 2,
-    PLUS     = 3,
-    MINUS    = 4,
-    MULT = 5,
-    DIV  = 6,
-    POWER = 7
+    BLANK    = 1,
+    CONSTANT = 2,
+    X        = 3,
+    PLUS     = 4,
+    MINUS    = 5,
+    MULT     = 6,
+    DIV      = 7,
+    POWER    = 8
 };
 
 struct Nod {
@@ -76,6 +76,10 @@ class Tree {
         return data;
     }
 
+    void NULLdata () {
+        data = NULL;
+    }
+
     unsigned int geterrCode () {
         return errCode;
     }
@@ -85,7 +89,6 @@ class Tree {
         canL      = CANL;
         canR      = CANR;
         hash      = 0;
-        errCode   = ok;
 
         dataCanL = (unsigned int*) calloc (sizeof (ELEM_T) + 2 * sizeof (unsigned int), 1);
         assert (dataCanL != NULL);
@@ -93,6 +96,7 @@ class Tree {
         assert (data != NULL);
         dataCanR = (unsigned int*) (data + 1);
 
+        errCode   = ok;
        *dataCanL = CANL;
        *dataCanR = CANR;
 
@@ -303,14 +307,16 @@ class Tree {
 
     ELEM_T* NodCtor (ELEM_T* prev = NULL, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL, ELEM_T* current = NULL) {
 
+        verifyHash ();
         ELEM_T* retVal = (current == NULL ? (ELEM_T*) calloc (1, sizeof (ELEM_T)) : current);
         assert (retVal != NULL);
 
         retVal->prev    = prev;
-        retVal->NodType = NodType;
+        retVal->type    = type;
         retVal->val     = val;
         retVal->left    = left;
         retVal->right   = right;
+        countHash ();
         return retVal;
     }
 
@@ -318,14 +324,16 @@ class Tree {
 
         if (iter == NULL) return;
 
+        verifyHash ();
         setPoison      (&iter->prev   );
-        setPoison      (&iter->NodType);
+        setPoison      (&iter->type   );
         setPoison      (&iter->val    );
         NodDtorRec     ( iter->left   );
         NodDtorRec     ( iter->right  );
         setPoison      (&iter->left   );
         setPoison      (&iter->right  );
         free           ( iter         );
+        countHash ();
     }
 
     void DataCountHash (unsigned int* multiplier, ELEM_T* iter = NULL) {
@@ -336,18 +344,22 @@ class Tree {
         DataCountHash (multiplier, iter->right);
     }
 
-    void NodAddRight (ELEM_T* iter = NULL, char NodType = 0, double val = 0, const char* f = NULL, ELEM_T* left = NULL, ELEM_T* right = NULL) {
+    ELEM_T* NodAddRight (ELEM_T* iter = NULL, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL) {
 
-        if (iter->right != NULL) return;
-
-        iter->right = NodCtor (iter, NodType, val, f, left, right);
+        verifyHash ();
+        iter->right = NodCtor (iter, type, val, left, right);
+        assert (iter->right != NULL);
+        countHash ();
+        return iter->right;
     }
 
-    void NodAddLeft (ELEM_T* iter = NULL, char NodType = 0, double val = 0, const char* f = NULL, ELEM_T* left = NULL, ELEM_T* right = NULL) {
+    ELEM_T* NodAddLeft (ELEM_T* iter = NULL, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL) {
 
-        if (iter->left != NULL) return;
-
-        iter->left = NodCtor (iter, NodType, val, f, left, right);
+        verifyHash ();
+        iter->left = NodCtor (iter, type, val, left, right);
+        assert (iter->left != NULL);
+        countHash ();
+        return iter->left;
     }
 
     void PrintNod (ELEM_T* nod, int* NodNumber, int depth, FILE* picSource, int ranks[][MAX_RANKS + 1]) {
@@ -358,8 +370,8 @@ class Tree {
         ranks[depth][0]++;
         ranks[depth][ranks[depth][0]] = *NodNumber;
 
-        picprintf ("\t" "\"Nod_%d\" [shape = \"Mrecord\", style = \"filled\", fillcolor = \"#9feb83\", label = \"{ <prev> Prev = %p | Current = %p | NodType = %hhd | Value = %f | Function = \\\"%s\\\" |{ <left> Left = %p | <right> Right = %p} }\"]\n",
-                    *NodNumber, nod->prev, nod, nod->NodType, nod->val, nod->f == NULL ? "" : nod->f, nod->left, nod->right);
+        picprintf ("\t" "\"Nod_%d\" [shape = \"Mrecord\", style = \"filled\", fillcolor = \"#9feb83\", label = \"{ <prev> Prev = %p | Current = %p | type = %d | Value = %f |{ <left> Left = %p | <right> Right = %p} }\"]\n",
+                    *NodNumber, nod->prev, nod, nod->type, nod->val, nod->left, nod->right);
 
         *NodNumber += 1;
         if (nod->left != NULL) {

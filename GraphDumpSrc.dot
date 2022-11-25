@@ -1,14 +1,21 @@
 digraph List_0 {
 	graph [dpi = 300];
 	rankdir = TB
-	"Nod_0" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000000000000000 | Current = 00000230993b1434 | NodType = 0 | Value = 0.000000 | Function = \"\" |{ <left> Left = 00000230993b1480 | <right> Right = 00000230993b14c0} }"]
-	"Nod_1" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000230993b1434 | Current = 00000230993b1480 | NodType = 0 | Value = 0.000000 | Function = \"\" |{ <left> Left = 00000230993b1500 | <right> Right = 0000000000000000} }"]
-	"Nod_2" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000230993b1480 | Current = 00000230993b1500 | NodType = 0 | Value = 0.000000 | Function = \"\" |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_3" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000230993b1434 | Current = 00000230993b14c0 | NodType = 0 | Value = 0.000000 | Function = \"\" |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_0" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000000000000000 | Current = 0000016d19171414 | type = 4 | Value = 0.000000 |{ <left> Left = 0000016d19171450 | <right> Right = 0000016d19171490} }"]
+	"Nod_1" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000016d19171414 | Current = 0000016d19171450 | type = 2 | Value = 1.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_2" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000016d19171414 | Current = 0000016d19171490 | type = 5 | Value = 0.000000 |{ <left> Left = 0000016d191714d0 | <right> Right = 0000016d19171510} }"]
+	"Nod_3" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000016d19171490 | Current = 0000016d191714d0 | type = 2 | Value = 2.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_4" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000016d19171490 | Current = 0000016d19171510 | type = 5 | Value = 0.000000 |{ <left> Left = 0000016d19171550 | <right> Right = 0000016d19171590} }"]
+	"Nod_5" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000016d19171510 | Current = 0000016d19171550 | type = 2 | Value = 13.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_6" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000016d19171510 | Current = 0000016d19171590 | type = 3 | Value = 1.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
 	{ rank = same;  Nod_0; }
-	{ rank = same;  Nod_1;  Nod_3; }
-	{ rank = same;  Nod_2; }
+	{ rank = same;  Nod_1;  Nod_2; }
+	{ rank = same;  Nod_3;  Nod_4; }
+	{ rank = same;  Nod_5;  Nod_6; }
 	"Nod_0":left -> "Nod_1";
-	"Nod_1":left -> "Nod_2";
-	"Nod_0":right -> "Nod_3";
+	"Nod_0":right -> "Nod_2";
+	"Nod_2":left -> "Nod_3";
+	"Nod_2":right -> "Nod_4";
+	"Nod_4":left -> "Nod_5";
+	"Nod_4":right -> "Nod_6";
 }
