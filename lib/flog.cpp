@@ -27,7 +27,7 @@ void flogIntern (const void* val, const char* varType, const char* varName, size
 
 
     if (!strcmp (varType, "Pc") or !strcmp (varType, "PKc")) fprintf (logOutf, "<%s>", *((const char**) val));
-    else if (varType[0] == 'P') fprintf (logOutf, "%p", val);
+    else if (varType[0] == 'P') fprintf (logOutf, "%p", *(size_t*)val);
 
     else if (!strcmp (varType, "i") or !strcmp (varType, "Ki")) fprintf (logOutf, "%d"   , *( ( const int*)                val));
     else if (!strcmp (varType, "x") or !strcmp (varType, "Kx")) fprintf (logOutf, "%lld" , *( ( const long long*)          val));

@@ -5,15 +5,10 @@
 #include "flog.h"
 
 #ifndef NDEBUG
-#define dump(clas) clas.dumpInside (#clas, __FILE__, __FUNCTION__, __LINE__) ///< NEW_STRUCT dump macros
+#define dump(clas) (clas).dumpInside (#clas, __FILE__, __FUNCTION__, __LINE__) ///< NEW_STRUCT dump macros
 #else
 #define dump(clas) ;
 #endif
-
-#define pasta(a) #a
-
-// ADD = 'NUM' = 256**2 * 'M' + 256 * 'U' + 'N', вывод через %.4s
-
 
 enum NodType {
 
@@ -31,7 +26,7 @@ struct Nod {
 
     Nod*    prev    = NULL;
     NodType type    = BLANK;
-    double  val     = 0;
+    int     val     = 0;
     int     NodNum  = 0;
     Nod*    left    = NULL;
     Nod*    right   = NULL;
@@ -40,7 +35,7 @@ struct Nod {
 template<typename ELEM_T>
 class Tree {
 
-    //constants
+    // constants
     static constexpr unsigned int       CANL      = 0xDEADBEEF; ///< Left cannary of a structure
     static constexpr unsigned int       CANR      = 0xD34DB33F; ///< Right cannary of a structure
     static constexpr unsigned char      POISON1   = 0xBD; ///< 1 byte Poison
@@ -49,7 +44,7 @@ class Tree {
     static constexpr unsigned long long POISON8   = 0xBADC0FEEF04DED32; ///< 8 byte Poison
     static constexpr unsigned int       MULT      = 37u; ///< Multiplier for hash
     static constexpr unsigned int       MAX_RANKS = 100;
-    /// @brief Describes errors within NEW_STRUCT
+
     enum errorCodes {
         ok                   = 0,    ///< All ok
         POISON_ACCESS        = 1<<0, ///< One or more struct elements is poison
@@ -65,8 +60,6 @@ class Tree {
         WRONG_HASH           = 1<<10 ///< Hash was changed without any changes from specified function
     };
 
-    //Not constants actually
-
     unsigned int   canL      = CANL; ///< left cannary of struct
     unsigned int   hash      = 0;    ///< hash value
     size_t         errCode   = ok;   ///< error code
@@ -75,164 +68,18 @@ class Tree {
     unsigned int*  dataCanR  = NULL; ///< right cannary of data
     unsigned int   canR      = CANR; ///< right cannary of struct
 
-    public:
+    void countHashSeg (void* left, void* right, unsigned int* multiplier) {
 
-    ELEM_T* getdata () {
+        assert (left != NULL);
+        assert (right != NULL);
+        assert (left < right);
+        assert (multiplier != NULL);
 
-        return data;
-    }
+        for (; left < right; left++) {
 
-    void NULLdata () {
-        data = NULL;
-    }
-
-    unsigned int geterrCode () {
-        return errCode;
-    }
-
-    Tree () {
-
-        canL      = CANL;
-        canR      = CANR;
-        hash      = 0;
-
-        dataCanL = (unsigned int*) calloc (sizeof (ELEM_T) + 2 * sizeof (unsigned int), 1);
-        assert (dataCanL != NULL);
-        data = NodCtor (NULL, BLANK, 0, NULL, NULL, (ELEM_T*) (dataCanL + 1));
-        assert (data != NULL);
-        dataCanR = (unsigned int*) (data + 1);
-
-        errCode   = ok;
-       *dataCanL = CANL;
-       *dataCanR = CANR;
-
-        countHash();
-    }
-
-    void countHashSeg (char* lft, char* rgt, unsigned int* mult) {
-
-        for (; lft < rgt; lft++) {
-
-            hash += ((unsigned int) *lft) * (*mult);
-            *mult *= MULT;
+            hash += ((unsigned int) * (char*) left) * (*multiplier);
+            *multiplier *= MULT;
         }
-    }
-
-    unsigned int countHash () {
-
-        unsigned int multiplier = 1;
-        hash = 0;
-
-        countHashSeg ((char*) &canL, (char*) &canR, &multiplier);
-
-        if (dataCanL != NULL) countHashSeg ((char*) dataCanL, (char*) dataCanR, &multiplier);
-
-        DataCountHash (&multiplier);
-
-        return hash;
-    }
-
-    bool verifyHash () {
-
-        if (hash != countHash ()) {
-
-            errCode |= WRONG_HASH;
-            return false;
-        }
-        return true;
-    }
-
-    template<typename varType>
-    void setPoison (varType* var) {
-
-        if (var == NULL) return;
-
-        switch(sizeof (varType)) {
-            case 1 : *((unsigned char*     ) var)      = POISON1; break;
-            case 2 : *((unsigned short*    ) var)      = POISON2; break;
-            case 4 : *((unsigned int*      ) var)      = POISON4; break;
-            case 8 : *((unsigned long long*) var)      = POISON8; break;
-
-            default:
-                memset (var, POISON1, sizeof (varType));
-            break;
-        }
-    }
-
-    template<typename varType>
-    bool isPoison (varType var) {
-
-        if (var == NULL) return 1;
-
-        switch(sizeof (varType)) {
-            case 1:
-                if ( *( (unsigned char*     ) &var) == POISON1) return 1;
-                else                                           return 0;
-                break;
-            case 2:
-                if ( *( (unsigned short*    ) &var) == POISON2) return 1;
-                else                                           return 0;
-                break;
-            case 4:
-                if ( *( (unsigned int*      ) &var) == POISON4) return 1;
-                else                                           return 0;
-                break;
-            case 8:
-                if ( *( (unsigned long long*) &var) == POISON8) return 1;
-                else                                           return 0;
-                break;
-            default:
-                for (int i = 0; i < sizeof (varType); i++) {
-
-                    if (*( ( (unsigned char*) &var) + i) != POISON1) return 0;
-                }
-                return 1;
-                break;
-        }
-    }
-
-    void dumpInside (const char* varName, const char* fileName, const char* funcName, size_t line) {
-
-        verifyHash ();
-
-        flogprintf ( "In file %s, function %s, line %llu, Tree named %s was dumped : <br>", fileName, funcName, line, varName);
-
-        flogprintf ( "\t" "Errors : <br>");
-
-        errCheck ();
-
-        logPrintErrors ();
-
-                                        flogprintf ( "\t" "hash = %u (", hash);
-        if      ( isPoison (hash)     ) flogprintf ( "POISONED)<br>")
-        else                            flogprintf ( "ok)<br>")
-
-                                        flogprintf ( "\t" "canL = 0x%X (", canL);
-        if      ( isPoison (canL)     ) flogprintf ( "POISONED)<br>")
-        else if ( canL      == CANL   ) flogprintf ( "ok)<br>")
-        else                            flogprintf ( "NOT_OK)<br>")
-
-                                        flogprintf ( "\t" "canR = 0x%X (", canR);
-        if      ( isPoison (canR)     ) flogprintf ( "POISONED)<br>")
-        else if ( canR      == CANR   ) flogprintf ( "ok)<br>")
-        else                            flogprintf ( "NOT_OK)<br>")
-
-                                        flogprintf ( "\t" "dataCanL = 0x%X (", *dataCanL);
-        if      (isPoison (*dataCanL))  flogprintf ( "POISONED)<br>")
-        else if (*dataCanL == CANL   )  flogprintf ( "ok)<br>")
-        else                            flogprintf ( "NOT_OK)<br>")
-
-                                        flogprintf ( "\t" "dataCanR = 0x%X (", *dataCanR);
-        if      (isPoison (*dataCanR))  flogprintf ( "POISONED)<br>")
-        else if (*dataCanR == CANR   )  flogprintf ( "ok)<br>")
-        else                            flogprintf ( "NOT_OK)<br>")
-
-        if (!isPoison (data) and data != NULL) {
-
-            TreeGraphDump ();
-        }
-
-        countHash ();
     }
 
     void logPrintErrors () {
@@ -258,10 +105,32 @@ class Tree {
 
     }
 
+    unsigned int countHash () {
+
+        unsigned int multiplier = 1;
+        hash = 0;
+
+        countHashSeg (&canL, &canR, &multiplier);
+
+        if (dataCanL != NULL) countHashSeg (dataCanL, dataCanR, &multiplier);
+
+        return hash;
+    }
+
+    bool verifyHash () {
+
+        if (hash != countHash()) {
+
+            errCode |= WRONG_HASH;
+            return false;
+        }
+        return true;
+    }
+
     size_t errCheck () {
 
         //checking for poison
-        if (isPoison ( errCode  )   ) {
+        if (isPoison (&errCode  )   ) {
 
             errCode = POISONED_ERRCOD;
             return errCode;
@@ -269,14 +138,14 @@ class Tree {
 
         verifyHash ();
 
-        if (isPoison ( canL     ) or
-            isPoison ( canR     ) or
-            isPoison ( data     ) or
+        if (isPoison (&canL     ) or
+            isPoison (&canR     ) or
+            isPoison (&data     ) or
+            isPoison (&dataCanL ) or
             isPoison ( dataCanL ) or
-            isPoison (*dataCanL ) or
+            isPoison (&dataCanR ) or
             isPoison ( dataCanR ) or
-            isPoison (*dataCanR ) or
-            isPoison ( hash     )   ) errCode |= POISON_ACCESS;
+            isPoison (&hash     )   ) errCode |= POISON_ACCESS;
 
         //end of check
 
@@ -293,127 +162,7 @@ class Tree {
         return errCode;
     }
 
-    void DTOR (){
-
-        setPoison (&canL      );
-        setPoison (&canR      );
-        setPoison (dataCanL   );
-        setPoison (dataCanR   );
-        setPoison (&dataCanR  );
-        setPoison (&errCode   );
-        setPoison (&hash      );
-
-        NodDtorRec ();
-
-        free      (dataCanL );
-        setPoison (&data     );
-    }
-
-    //Nod part PART
-
-    ELEM_T* NodCtor (ELEM_T* prev = NULL, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL, ELEM_T* current = NULL) {
-
-        verifyHash ();
-        ELEM_T* retVal = (current == NULL ? (ELEM_T*) calloc (1, sizeof (ELEM_T)) : current);
-        assert (retVal != NULL);
-
-        retVal->prev    = prev;
-        retVal->type    = type;
-        retVal->val     = val;
-        retVal->left    = left;
-        retVal->right   = right;
-        countHash ();
-        return retVal;
-    }
-
-    void NodDtorRec (ELEM_T* iter = NULL) {
-
-        if (iter == NULL) return;
-
-        verifyHash ();
-        setPoison      (&iter->type   );
-        setPoison      (&iter->val    );
-        NodDtorRec     ( iter->left   );
-        NodDtorRec     ( iter->right  );
-        setPoison      (&(iter->left) );
-        setPoison      (&(iter->right));
-        if (iter->prev != NULL) {
-
-            if (iter->prev->left == iter) iter->prev->left = NULL;
-            else iter->prev->right = NULL;
-        }
-        setPoison      (&iter->prev   );
-        free           ( iter         );
-        countHash ();
-    }
-
-    void DataCountHash (unsigned int* multiplier, ELEM_T* iter = NULL) {
-
-        if (iter == NULL) return;
-        countHashSeg ((char*) iter->prev, (char*) iter->right, multiplier);
-        DataCountHash (multiplier, iter->left);
-        DataCountHash (multiplier, iter->right);
-    }
-
-    ELEM_T* NodAddRight (ELEM_T* iter = NULL, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL) {
-
-        verifyHash ();
-        iter->right = NodCtor (iter, type, val, left, right);
-        assert (iter->right != NULL);
-        countHash ();
-        return iter->right;
-    }
-
-    ELEM_T* NodAddLeft (ELEM_T* iter = NULL, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL) {
-
-        verifyHash ();
-        iter->left = NodCtor (iter, type, val, left, right);
-        assert (iter->left != NULL);
-        countHash ();
-        return iter->left;
-    }
-
-    void PrintNod (ELEM_T* nod, int* NodNumber, int depth, FILE* picSource, int ranks[][MAX_RANKS + 1]) {
-
-        #define picprintf(...) fprintf (picSource, __VA_ARGS__)
-
-        nod->NodNum = *NodNumber;
-        ranks[depth][0]++;
-        ranks[depth][ranks[depth][0]] = *NodNumber;
-
-        picprintf ("\t" "\"Nod_%d\" [shape = \"Mrecord\", style = \"filled\", fillcolor = \"#9feb83\", label = \"{ <prev> Prev = %p | Current = %p | type = %.4s | Value = %f |{ <left> Left = %p | <right> Right = %p} }\"]\n",
-                    *NodNumber, nod->prev, nod, &nod->type, nod->val, nod->left, nod->right);
-
-        *NodNumber += 1;
-        if (nod->left != NULL) {
-
-            PrintNod(nod->left, NodNumber, depth + 1, picSource, ranks);
-        }
-        if (nod->right != NULL) {
-
-            PrintNod (nod->right, NodNumber, depth + 1, picSource, ranks);
-        }
-
-        #undef picprintf
-    }
-
-    void PrintConnections (ELEM_T* nod, FILE* picSource) {
-
-        #define picprintf(...) fprintf (picSource, __VA_ARGS__)
-
-        if (nod->left != NULL) {
-
-            picprintf ("\t" "\"Nod_%d\":left -> \"Nod_%d\";\n", nod->NodNum, nod->left->NodNum);
-            PrintConnections (nod->left, picSource);
-        }
-        if (nod->right != NULL) {
-
-            picprintf ("\t" "\"Nod_%d\":right -> \"Nod_%d\";\n", nod->NodNum, nod->right->NodNum);
-            PrintConnections (nod->right, picSource);
-        }
-
-        #undef picprintf
-    }
+    // Nod part
 
     void TreeGraphDump () {
 
@@ -459,14 +208,298 @@ class Tree {
 
         system (command);
 
-        flogprintf("<pre>\n");
         flogprintf("<h2>Tree dump</h2>\n");
         flogprintf("<img src = \"%s\" style = \"width: 55%%; height: auto\"/>\n", picName);
-        flogprintf("<hr>\n");
 
         GraphDumpCounter++;
 
         #undef picprintf
     }
 
+    void PrintConnections (ELEM_T* nod, FILE* picSource) {
+
+        #define picprintf(...) fprintf (picSource, __VA_ARGS__)
+
+        if (nod->left != NULL) {
+
+            picprintf ("\t" "\"Nod_%d\":left -> \"Nod_%d\";\n", nod->NodNum, nod->left->NodNum);
+            PrintConnections (nod->left, picSource);
+        }
+        if (nod->right != NULL) {
+
+            picprintf ("\t" "\"Nod_%d\":right -> \"Nod_%d\";\n", nod->NodNum, nod->right->NodNum);
+            PrintConnections (nod->right, picSource);
+        }
+
+        #undef picprintf
+    }
+
+    void PrintNod (ELEM_T* nod, int* NodNumber, int depth, FILE* picSource, int ranks[][MAX_RANKS + 1]) {
+
+        #define picprintf(...) fprintf (picSource, __VA_ARGS__)
+
+        nod->NodNum = *NodNumber;
+        ranks[depth][0]++;
+        ranks[depth][ranks[depth][0]] = *NodNumber;
+
+        picprintf ("\t" "\"Nod_%d\" [shape = \"Mrecord\", style = \"filled\", fillcolor = \"#9feb83\", label = \"{ <prev> Prev = %p | Current = %p | type = %.4s | Value = %f |{ <left> Left = %p | <right> Right = %p} }\"]\n",
+                    *NodNumber, nod->prev, nod, &nod->type, (double) nod->val, nod->left, nod->right);
+
+        *NodNumber += 1;
+        if (nod->left != NULL) {
+
+            PrintNod(nod->left, NodNumber, depth + 1, picSource, ranks);
+        }
+        if (nod->right != NULL) {
+
+            PrintNod (nod->right, NodNumber, depth + 1, picSource, ranks);
+        }
+
+        #undef picprintf
+    }
+
+    public:
+
+    Tree (unsigned int _size = 1) :
+        canL (CANL), canR (CANR), hash(0), errCode (ok) {
+
+        dataCanL = (unsigned int*) calloc (sizeof (ELEM_T) * _size + 2 * sizeof (unsigned int), 1);
+        assert (dataCanL != NULL);
+        data = (ELEM_T*) (dataCanL + 1);
+        assert (data != NULL);
+        dataCanR = (unsigned int*) (data + _size);
+        assert (dataCanR != NULL);
+
+       *dataCanL = CANL;
+       *dataCanR = CANR;
+
+        countHash();
+    }
+
+    ELEM_T* getdata () {
+
+        return data;
+    }
+
+    unsigned int geterrCode () {
+
+        return errCode;
+    }
+
+    template<typename varType>
+    void setPoison (varType* var) {
+
+        if (var == NULL) return;
+
+        switch(sizeof (varType)) {
+            case 1 : *((unsigned char*     ) var)      = POISON1; break;
+            case 2 : *((unsigned short*    ) var)      = POISON2; break;
+            case 4 : *((unsigned int*      ) var)      = POISON4; break;
+            case 8 : *((unsigned long long*) var)      = POISON8; break;
+
+            default:
+                memset (var, POISON1, sizeof (varType));
+            break;
+        }
+    }
+
+    template<typename varType>
+    bool isPoison (varType* var) {
+
+        if (var == NULL) return 1;
+
+        switch(sizeof (varType)) {
+
+            case 1:
+                if ( *( (unsigned char*     ) &var) == POISON1) return 1;
+                else                                            return 0;
+            break;
+
+            case 2:
+                if ( *( (unsigned short*    ) &var) == POISON2) return 1;
+                else                                            return 0;
+            break;
+
+            case 4:
+                if ( *( (unsigned int*      ) &var) == POISON4) return 1;
+                else                                            return 0;
+            break;
+
+            case 8:
+                if ( *( (unsigned long long*) &var) == POISON8) return 1;
+                else                                            return 0;
+            break;
+
+            default:
+                for (int i = 0; i < sizeof (varType); i++) {
+
+                    if (*( ( (unsigned char*) &var) + i) != POISON1) return 0;
+                }
+            return 1;
+            break;
+        }
+    }
+
+    void DTOR () {
+
+        setPoison (&canL);
+        setPoison (&canR);
+        setPoison (&errCode);
+        setPoison (&hash);
+
+        if (dataCanL != NULL) {
+
+            setPoison (dataCanL);
+            setPoison (dataCanR);
+            dataCanL++;
+            for (; data < dataCanR; data++) setPoison (data);
+            free (dataCanL);
+            setPoison (&dataCanL);
+            setPoison (&data);
+            setPoison (&dataCanR);
+        }
+    }
+
+    void dumpInside (const char* name, const char* fileName, const char* funcName, size_t line) {
+
+        errCheck ();
+
+        flogprintf ("<pre>" "In file %s, function %s, line %llu, Tree named %s was dumped : <br>",
+            fileName, funcName, line, name);
+
+        flogprintf ("\t" "Errors : <br>");
+
+        logPrintErrors ();
+
+                                        flogprintf ( "\t" "hash = %u (", hash);
+        if      ( isPoison (&hash)     ) flogprintf ( "POISONED)<br>")
+        else                            flogprintf ( "ok)<br>")
+
+                                        flogprintf ( "\t" "canL = 0x%X (", canL);
+        if      ( isPoison (&canL)     ) flogprintf ( "POISONED)<br>")
+        else if ( canL      == CANL   ) flogprintf ( "ok)<br>")
+        else                            flogprintf ( "NOT_OK)<br>")
+
+                                        flogprintf ( "\t" "canR = 0x%X (", canR);
+        if      ( isPoison (&canR)     ) flogprintf ( "POISONED)<br>")
+        else if ( canR      == CANR   ) flogprintf ( "ok)<br>")
+        else                            flogprintf ( "NOT_OK)<br>")
+
+                                        flogprintf ( "\t" "dataCanL = 0x%X (", *dataCanL);
+        if      (isPoison (dataCanL))  flogprintf ( "POISONED)<br>")
+        else if (*dataCanL == CANL   )  flogprintf ( "ok)<br>")
+        else                            flogprintf ( "NOT_OK)<br>")
+
+                                        flogprintf ( "\t" "dataCanR = 0x%X (", *dataCanR);
+        if      (isPoison (dataCanR))  flogprintf ( "POISONED)<br>")
+        else if (*dataCanR == CANR   )  flogprintf ( "ok)<br>")
+        else                            flogprintf ( "NOT_OK)<br>")
+
+        if (!isPoison (data) and data != NULL) {
+
+            TreeGraphDump ();
+        }
+
+        flogprintf ("</pre><hr>\n");
+        countHash ();
+    }
+
+    //Nod part
+
+    ELEM_T* NodCtor (ELEM_T* prev = NULL, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL, ELEM_T* current = NULL) {
+
+        verifyHash ();
+        ELEM_T* retVal = (current == NULL ? (ELEM_T*) calloc (1, sizeof (ELEM_T)) : current);
+        assert (retVal != NULL);
+
+        retVal->prev    = prev;
+        retVal->type    = type;
+        retVal->val     = val;
+        retVal->left    = left;
+        retVal->right   = right;
+        countHash ();
+        return retVal;
+    }
+
+    void NodDtorRec (ELEM_T* iter = NULL) {
+
+        if (iter == NULL) return;
+
+        verifyHash ();
+        setPoison (&iter->type);
+        setPoison (&iter->val);
+
+        NodDtorRec (iter->left);
+        NodDtorRec (iter->right);
+
+        setPoison (&iter->left);
+        setPoison (&iter->right);
+
+        if (iter->prev != NULL)
+            if (iter->prev->left == iter) iter->prev->left = NULL;
+            else iter->prev->right = NULL;
+
+        setPoison (&iter->prev);
+        free (iter);
+        countHash ();
+    }
+
+    ELEM_T* NodAddRight (ELEM_T* iter, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL) {
+
+        assert (iter != NULL);
+        verifyHash ();
+
+        iter->right = NodCtor (iter, type, val, left, right);
+        assert (iter->right != NULL);
+
+        countHash ();
+        return iter->right;
+    }
+
+    ELEM_T* NodAddLeft (ELEM_T* iter, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL) {
+
+        assert (iter != NULL);
+        verifyHash ();
+
+        iter->left = NodCtor (iter, type, val, left, right);
+        assert (iter->left != NULL);
+
+        countHash ();
+        return iter->right;
+    }
+
+    void NodMoveLeft (ELEM_T* iter, NodType type = BLANK, double val = 0) {
+
+        NodAddLeft (iter, iter->type, iter->val, iter->left, iter->right);
+        NodCtor (iter->prev, type, val, iter->left, NULL, iter);
+        if (iter->left->left != NULL) iter->left->left->prev = iter->left;
+        if (iter->left->right != NULL) iter->left->right->prev = iter->left;
+        countHash ();
+    }
+
+    void NodMoveRight (ELEM_T* iter, NodType type = BLANK, double val = 0) {
+
+        NodAddRight (iter, iter->type, iter->val, iter->left, iter->right);
+        NodCtor (iter->prev, type, val, iter->left, NULL, iter);
+        if (iter->right->left != NULL) iter->right->left = iter->right;
+        if (iter->right->right != NULL) iter->right->right = iter->right;
+    }
+
+    void NodRecCpy (ELEM_T* src, ELEM_T* dst) {
+
+        assert (dst != NULL);
+        assert (src != NULL);
+
+        dst = NodCtor (dst->prev, src->type, src->val, NULL, NULL, dst);
+        if (src->left != NULL) {
+
+            NodAddLeft (dst);
+            TreeCpy (dst->left, src->left);
+        }
+        if (src->right != NULL) {
+
+            NodAddRight (dst);
+            TreeCpy (dst->right, src->right);
+        }
+    }
 };
