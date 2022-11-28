@@ -9,9 +9,7 @@
 #include "../lib/flog.h"
 #include "../lib/tree.h"
 
-Tree<Nod> functionReader (char* function, const char varName);
-
-void GetG (char* function, Tree<Nod>* tree, const char varName);
+Tree<Nod> GetG (char* function, const char varName);
 
 void GetPlus (char** s, Tree<Nod>* tree, Nod* iter, const char varName);
 

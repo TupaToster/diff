@@ -168,6 +168,11 @@ class Tree {
 
         static int GraphDumpCounter = 0;
 
+        if (GraphDumpCounter == 0) {
+
+            system ("rm *.png");
+        }
+
         #define picprintf(...) fprintf (picSource, __VA_ARGS__)
 
         char srcName[] = "GraphDumpSrc.dot";
@@ -178,12 +183,17 @@ class Tree {
         assert (picSource != NULL);
 
         picprintf ("digraph List_%d {" "\n", GraphDumpCounter);
-        picprintf ("\t" "graph [dpi = 300];" "\n");
+        picprintf ("\t" "graph [dpi = 100];" "\n");
         picprintf ("\t" "rankdir = TB" "\n");
 
         int ranks[MAX_RANKS][MAX_RANKS + 1] = {0};
         int NodNum = 0;
+
+        verifyHash ();
+
         PrintNod (data, &NodNum, 0, picSource, ranks);
+
+        countHash ();
 
         for (int i = 0; i < MAX_RANKS and ranks[i][0] != 0; i++) {
 
@@ -238,7 +248,10 @@ class Tree {
 
         #define picprintf(...) fprintf (picSource, __VA_ARGS__)
 
+        verifyHash ();
         nod->NodNum = *NodNumber;
+        countHash ();
+
         ranks[depth][0]++;
         ranks[depth][ranks[depth][0]] = *NodNumber;
 
@@ -352,7 +365,7 @@ class Tree {
             setPoison (dataCanL);
             setPoison (dataCanR);
             dataCanL++;
-            for (; data < dataCanR; data++) setPoison (data);
+            for (; (void*) data < (void*) dataCanR; data++) setPoison (data);
             free (dataCanL);
             setPoison (&dataCanL);
             setPoison (&data);
@@ -371,29 +384,29 @@ class Tree {
 
         logPrintErrors ();
 
-                                        flogprintf ( "\t" "hash = %u (", hash);
+                                         flogprintf ( "\t" "hash     = %u (", hash);
         if      ( isPoison (&hash)     ) flogprintf ( "POISONED)<br>")
-        else                            flogprintf ( "ok)<br>")
+        else                             flogprintf ( "ok)<br>")
 
-                                        flogprintf ( "\t" "canL = 0x%X (", canL);
+                                         flogprintf ( "\t" "canL     = 0x%X (", canL);
         if      ( isPoison (&canL)     ) flogprintf ( "POISONED)<br>")
-        else if ( canL      == CANL   ) flogprintf ( "ok)<br>")
+        else if ( canL      == CANL    ) flogprintf ( "ok)<br>")
         else                            flogprintf ( "NOT_OK)<br>")
 
-                                        flogprintf ( "\t" "canR = 0x%X (", canR);
+                                         flogprintf ( "\t" "canR     = 0x%X (", canR);
         if      ( isPoison (&canR)     ) flogprintf ( "POISONED)<br>")
-        else if ( canR      == CANR   ) flogprintf ( "ok)<br>")
-        else                            flogprintf ( "NOT_OK)<br>")
+        else if ( canR      == CANR    ) flogprintf ( "ok)<br>")
+        else                             flogprintf ( "NOT_OK)<br>")
 
-                                        flogprintf ( "\t" "dataCanL = 0x%X (", *dataCanL);
-        if      (isPoison (dataCanL))  flogprintf ( "POISONED)<br>")
-        else if (*dataCanL == CANL   )  flogprintf ( "ok)<br>")
-        else                            flogprintf ( "NOT_OK)<br>")
+                                         flogprintf ( "\t" "dataCanL = 0x%X (", *dataCanL);
+        if      (isPoison (dataCanL)   ) flogprintf ( "POISONED)<br>")
+        else if (*dataCanL == CANL     ) flogprintf ( "ok)<br>")
+        else                             flogprintf ( "NOT_OK)<br>")
 
-                                        flogprintf ( "\t" "dataCanR = 0x%X (", *dataCanR);
-        if      (isPoison (dataCanR))  flogprintf ( "POISONED)<br>")
-        else if (*dataCanR == CANR   )  flogprintf ( "ok)<br>")
-        else                            flogprintf ( "NOT_OK)<br>")
+                                         flogprintf ( "\t" "dataCanR = 0x%X (", *dataCanR);
+        if      (isPoison (dataCanR)   ) flogprintf ( "POISONED)<br>")
+        else if (*dataCanR == CANR     ) flogprintf ( "ok)<br>")
+        else                             flogprintf ( "NOT_OK)<br>")
 
         if (!isPoison (data) and data != NULL) {
 
@@ -483,6 +496,29 @@ class Tree {
         NodCtor (iter->prev, type, val, iter->left, NULL, iter);
         if (iter->right->left != NULL) iter->right->left = iter->right;
         if (iter->right->right != NULL) iter->right->right = iter->right;
+        countHash ();
+    }
+
+    void NodUnMoveRight (ELEM_T* iter) {
+
+        ELEM_T* right = iter->right;
+        NodCtor (iter->prev, iter->right->type, iter->right->type, iter->right->left, iter->right->right, iter);
+        NodCtor (NULL, BLANK, 0, NULL, NULL, right);
+        NodDtorRec (right);
+        if (iter->right != NULL) iter->right->prev = iter;
+        if (iter->left != NULL) iter->left->prev = iter;
+        countHash ();
+    }
+
+    void NodUnMoveLeft (ELEM_T* iter) {
+
+        ELEM_T* left = iter->left;
+        NodCtor (iter->prev, iter->left->type, iter->left->type, iter->left->left, iter->left->right, iter);
+        NodCtor (NULL, BLANK, 0, NULL, NULL, left);
+        NodDtorRec (left);
+        if (iter->right != NULL) iter->right->prev = iter;
+        if (iter->left != NULL) iter->left->prev = iter;
+        countHash ();
     }
 
     void NodRecCpy (ELEM_T* src, ELEM_T* dst) {
@@ -501,5 +537,6 @@ class Tree {
             NodAddRight (dst);
             TreeCpy (dst->right, src->right);
         }
+        countHash ();
     }
 };

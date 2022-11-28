@@ -1,242 +1,201 @@
 #include "diff.h"
 
-// void simplify (Tree<Nod>* tree, Nod* iter) {
+void simplify (Tree<Nod>* tree, Nod* iter) {
 
-//     if (iter == NULL) return;
+    if (iter == NULL) return;
 
-//     simplify (tree, iter->left);
-//     simplify (tree, iter->right);
+    simplify (tree, iter->left);
+    simplify (tree, iter->right);
 
-//     killXZero (tree, iter);
-//     killConstants (tree, iter);
-//     deXPow (tree, iter);
-//     divByX (tree, iter);
-//     xPower (tree, iter);
-//     killNeutral (tree, iter);
+    killConstants (tree, iter);
+    killXZero (tree, iter);
+    flog (iter);
+    dump (*tree);
+    deXPow (tree, iter);
+    divByX (tree, iter);
+    xPower (tree, iter);
+    killNeutral (tree, iter);
+}
 
-// }
+void killConstants (Tree<Nod>* tree, Nod* iter) {
 
-// void killConstants (Tree<Nod>* tree, Nod* iter) {
+    if (iter->left == NULL or iter->right == NULL) return;
 
-//     if (iter->left == NULL or iter->right == NULL) return;
+    if (iter->left->type == CONSTANT and iter->right->type == CONSTANT) {
 
-//     if (iter->left->type == CONSTANT and iter->right->type == CONSTANT) {
+        switch (iter->type){
 
-//         tree->verifyHash ();
+            case PLUS:
+                tree->NodCtor (iter->prev, CONSTANT, iter->left->val + iter->right->val, iter->left, iter->right, iter);
+                break;
 
-//         switch (iter->type){
+            case MINUS:
+                tree->NodCtor (iter->prev, CONSTANT, iter->left->val - iter->right->val, iter->left, iter->right, iter);
+                break;
 
-//             case PLUS:
-//                 iter->val = iter->left->val + iter->right->val;
-//                 break;
+            case MULT:
+                tree->NodCtor (iter->prev, CONSTANT, iter->left->val * iter->right->val, iter->left, iter->right, iter);
+                break;
 
-//             case MINUS:
-//                 iter->val = iter->left->val - iter->right->val;
-//                 break;
+            case DIV:
+                tree->NodCtor (iter->prev, CONSTANT, iter->left->val / iter->right->val, iter->left, iter->right, iter);
+                break;
 
-//             case MULT:
-//                 iter->val = iter->left->val * iter->right->val;
-//                 break;
+            case POWER:
+                tree->NodCtor (iter->prev, CONSTANT, pow (iter->left->val, iter->right->val), iter->left, iter->right, iter);
+                break;
 
-//             case DIV:
-//                 iter->val = iter->left->val / iter->right->val;
-//                 break;
+            default:
+                printf ("Wrong nod type at nod %p\n", iter);
+                dump((*tree));
+                assert (iter->type == BLANK);
+            break;
+        }
 
-//             case POWER:
-//                 iter->val = pow (iter->left->val, iter->right->val);
-//                 break;
+        tree->NodDtorRec (iter->left);
+        tree->NodDtorRec (iter->right);
+    }
+}
 
-//             default:
-//                 printf ("Wrong nod type at nod %p\n", iter);
-//                 dump((*tree));
-//                 exit (-1);
-//             break;
-//         }
+void xPower (Tree<Nod>* tree, Nod* iter) {
 
-//         iter->type = CONSTANT;
+    if (iter->left == NULL or iter->right == NULL) return;
 
-//         tree->countHash ();
+    if (iter->left->type != X or iter->right->type != X) return;
 
-//         tree->NodDtorRec (iter->left);
-//         tree->NodDtorRec (iter->right);
+    switch (iter->type){
 
-//         tree->verifyHash();
-//         iter->left = NULL;
-//         iter->right = NULL;
-//         tree->countHash();
-//     }
-// }
+        case PLUS:
 
-// void xPower (Tree<Nod>* tree, Nod* iter) {
+            if (iter->left->val == iter->right->val) {
 
-//     if (iter->left == NULL or iter->right == NULL) return;
+                tree->NodCtor (iter->prev, MULT, 0, iter->left, iter->right, iter);
+                tree->NodCtor (iter, CONSTANT, 2, iter->left->left, iter->left->right, iter->left);
+            }
+        return;
 
-//     if (iter->left->type != X or iter->right->type != X) return;
+        case MINUS:
 
-//     tree->verifyHash ();
+            if (iter->left->val == iter->right->val) {
 
-//     switch (iter->type){
+                tree->NodCtor (iter->prev, CONSTANT, 0, iter->left, iter->right, iter);
+                tree->NodDtorRec (iter->left);
+                tree->NodDtorRec (iter->right);
+            }
+        return;
 
-//         case PLUS:
-//             if (iter->left->val == iter->right->val) {
+        case MULT:
 
-//                 iter->type = MULT;
-//                 iter->left->type = CONSTANT;
-//                 iter->left->val = 2;
-//                 tree->countHash ();
-//             }
-//             return;
+            tree->NodCtor (iter->prev, X, iter->left->val + iter->right->val, iter->left, iter->right, iter);
+            tree->NodDtorRec (iter->left);
+            tree->NodDtorRec (iter->right);
+        return;
 
-//         case MINUS:
-//             if (iter->left->val == iter->right->val) {
+        case DIV:
 
-//                 iter->type = CONSTANT;
-//                 iter->val = 0;
-//                 tree->countHash();
-//                 tree->NodDtorRec (iter->left);
-//                 tree->NodDtorRec (iter->right);
-//                 tree->countHash ();
-//             }
-//             return;
+            tree->NodCtor (iter->prev, X, iter->left->val - iter->right->val, iter->left, iter->right, iter);
+            tree->NodDtorRec (iter->left);
+            tree->NodDtorRec (iter->right);
+        return;
 
-//         case MULT:
-//             iter->type = X;
-//             iter->val = iter->left->val + iter->right->val;
-//             tree->countHash();
-//             tree->NodDtorRec (iter->left);
-//             tree->NodDtorRec (iter->right);
-//             tree->countHash ();
-//             return;
+        default:
 
-//         case DIV:
-//             iter->type = X;
-//             iter->val = iter->left->val - iter->right->val;
-//             tree->countHash();
-//             tree->NodDtorRec (iter->left);
-//             tree->NodDtorRec (iter->right);
-//             tree->countHash ();
-//             return;
+            printf ("Wrong nod type at nod %p\n", iter);
+            dump((*tree));
+            exit (-1);
+        break;
+    }
+}
 
-//         default:
-//             printf ("Wrong nod type at nod %p\n", iter);
-//             dump((*tree));
-//             exit (-1);
-//         break;
-//     }
-// }
+void divByX (Tree<Nod>* tree, Nod* iter) {
 
-// void divByX (Tree<Nod>* tree, Nod* iter) {
+    if (iter->left == NULL or iter->right == NULL) return;
 
-//     if (iter->left == NULL or iter->right == NULL) return;
+    if (iter->type == DIV and iter->right->type == X) {
 
-//     if (iter->left->type != CONSTANT or iter->right->type != X or iter->type != DIV) return;
+        tree->NodCtor (iter->prev, MULT, 0, iter->left, iter->right, iter);
+        tree->NodCtor (iter, X, -iter->right->val, iter->right->left, iter->right->right, iter->right);
+    }
+}
 
-//     iter->type = MULT;
-//     iter->left->val = -iter->left->val;
-// }
+void deXPow (Tree<Nod>* tree, Nod* iter) {
 
-// void deXPow (Tree<Nod>* tree, Nod* iter) {
+    if (iter->left == NULL or iter->right == NULL) return;
 
-//     if (iter->left == NULL or iter->right == NULL) return;
+    if (iter->left->type == X and iter->right->type == CONSTANT and iter->type == POWER) {
 
-//     if (iter->left->type != X or iter->right->type != CONSTANT or iter->type != POWER) return;
+        tree->NodCtor (iter->prev, X, iter->right->val * iter->left->val, iter->left, iter->right, iter);
 
-//     iter->type = X;
-//     iter->val = iter->right->val * iter->left->val;
-//     tree->countHash ();
+        tree->NodDtorRec (iter->left);
+        tree->NodDtorRec (iter->right);
+    }
+}
 
-//     tree->NodDtorRec (iter->left);
-//     tree->NodDtorRec (iter->right);
+void killNeutral (Tree<Nod>* tree, Nod* iter) {
 
-//     tree->verifyHash ();
-//     iter->left = NULL;
-//     iter->right = NULL;
-//     tree->countHash ();
-// }
+    if (iter->type == PLUS) {
 
-// void killNeutral (Tree<Nod>* tree, Nod* iter) {
+        if (iter->left->type == CONSTANT and iter->left->val == 0) {
 
-//     if (iter->type == PLUS or iter->type == MINUS) {
+            tree->NodDtorRec (iter->left);
+            tree->NodUnMoveRight (iter);
+        }
+        else if (iter->right->type == CONSTANT and iter->right->val == 0) {
 
-//         if (iter->left->type == CONSTANT and iter->left->val == 0) {
+            tree->NodDtorRec (iter->right);
+            tree->NodUnMoveLeft (iter);
+        }
+    }
+    else if (iter->type == MULT) {
 
-//             tree->NodDtorRec (iter->left);
-//             Nod* temp = iter->right;
-//             tree->TreeCpy (iter, temp);
-//             temp->prev = NULL;
-//             tree->NodDtorRec (temp);
-//         }
-//         else if (iter->right->type == CONSTANT and iter->right->val == 0) {
+        if (iter->left->type == CONSTANT and iter->left->val == 1) {
 
-//             tree->NodDtorRec (iter->right);
-//             Nod* temp = iter->left;
-//             tree->TreeCpy (iter, temp);
-//             temp->prev = NULL;
-//             tree->NodDtorRec (temp);
-//         }
-//     }
-//     else if (iter->type == MULT) {
+            tree->NodDtorRec (iter->left);
+            tree->NodUnMoveRight (iter);
+        }
+        else if (iter->right->type == CONSTANT and iter->right->val == 1) {
 
-//         if (iter->left->type == CONSTANT and iter->left->val == 1) {
+            tree->NodDtorRec (iter->right);
+            tree->NodUnMoveLeft (iter);
+        }
+        else if (iter->left->type == CONSTANT and iter->left->val == 0 or
+                 iter->right->type == CONSTANT and iter->right->val == 0) {
 
-//             tree->NodDtorRec (iter->left);
-//             Nod* temp = iter->right;
-//             tree->TreeCpy (iter, temp);
-//             temp->prev = NULL;
-//             tree->NodDtorRec (temp);
-//         }
-//         else if (iter->right->type == CONSTANT and iter->right->val == 1) {
+            tree->NodDtorRec (iter->left);
+            tree->NodDtorRec (iter->right);
+            tree->NodCtor (iter->prev, CONSTANT, 0, NULL, NULL, iter);
+        }
+    }
+    else if (iter->type == DIV) {
 
-//             tree->NodDtorRec (iter->right);
-//             Nod* temp = iter->left;
-//             tree->TreeCpy (iter, temp);
-//             temp->prev = NULL;
-//             tree->NodDtorRec (temp);
-//         }
-//         else if (iter->left->type == CONSTANT and iter->left->val == 0 or
-//                  iter->right->type == CONSTANT and iter->right->val == 0) {
+        if (iter->left->type == CONSTANT and iter->left->val == 0) {
 
-//             tree->NodDtorRec (iter->left);
-//             tree->NodDtorRec (iter->right);
-//             tree->NodCtor (iter->prev, CONSTANT, 0, NULL, NULL, iter);
-//         }
-//     }
-//     else if (iter->type == DIV) {
+            tree->NodDtorRec (iter->left);
+            tree->NodDtorRec (iter->right);
+            tree->NodCtor (iter->prev, CONSTANT, 0, NULL, NULL, iter);
+        }
+    }
+    else if (iter->type == POWER) {
 
-//         if (iter->left->type == CONSTANT and iter->left->val == 0) {
+        if (iter->right->type == CONSTANT and iter->right->val == 0) {
 
-//             tree->NodDtorRec (iter->left);
-//             tree->NodDtorRec (iter->right);
-//             tree->NodCtor (iter->prev, CONSTANT, 0, NULL, NULL, iter);
-//         }
-//     }
-//     else if (iter->type == POWER) {
+            tree->NodCtor (iter->prev, CONSTANT, 1, iter->left, iter->right, iter);
+            tree->NodDtorRec (iter->left);
+            tree->NodDtorRec (iter->right);
+        }
+        else if (iter->left->type == CONSTANT and (iter->left->val == 1 or iter->left->val == 0)) {
 
-//         if (iter->right->type == CONSTANT and iter->right->val == 0) {
+            tree->NodCtor (iter->prev, CONSTANT, iter->left->val == 1 ? 1 : 0, iter->left, iter->right, iter);
+            tree->NodDtorRec (iter->left);
+            tree->NodDtorRec (iter->right);
+        }
+    }
+}
 
-//             tree->NodCtor (iter->prev, CONSTANT, 1, iter->left, iter->right, iter);
-//             tree->NodDtorRec (iter->left);
-//             tree->NodAddLeft (iter->right);
-//         }
-//         else if (iter->left->type == CONSTANT and (iter->left->val == 1 or iter->left->val == 0)) {
+void killXZero (Tree<Nod>* tree, Nod* iter) {
 
-//             tree->NodCtor (iter->prev, CONSTANT, iter->left->val == 1 ? 1 : 0, iter->left, iter->right, iter);
-//             tree->NodDtorRec (iter->left);
-//             tree->NodDtorRec (iter->right);
-//         }
-//     }
-// }
-
-// void killXZero (Tree<Nod>* tree, Nod* iter) {
-
-//     if (iter->type == X and iter->val == 0) {
-
-//         tree->verifyHash ();
-//         iter->type = CONSTANT;
-//         iter->val = 1;
-//         tree->countHash ();
-//     }
-// }
+    if (iter->type == X and iter->val == 0) tree->NodCtor (iter->prev, CONSTANT, 1, NULL, NULL, iter);
+}
 
 // Tree<Nod> differentiate (Tree<Nod>* tree) {
 
@@ -353,18 +312,13 @@
 //     }
 // }
 
-Tree<Nod> functionReader (char* function, const char varName) {
+Tree<Nod> GetG (char* function, const char varName) {
 
     Tree<Nod> tree;
-    GetG (function, &tree, varName);
-    return tree;
-}
-
-void GetG (char* function, Tree<Nod>* tree, const char varName) {
-
     char* s = function;
-    GetPlus (&s, tree, tree->getdata (), varName);
+    GetPlus (&s, &tree, tree.getdata (), varName);
     assert (*s == '\0');
+    return tree;
 }
 
 void GetPlus (char** s, Tree<Nod>* tree, Nod* iter, const char varName) {
@@ -372,6 +326,7 @@ void GetPlus (char** s, Tree<Nod>* tree, Nod* iter, const char varName) {
     GetMult (s, tree, iter, varName);
 
     while (**s == '+' or **s == '-') {
+
 
         tree->NodMoveLeft (iter);
         tree->NodCtor (iter->prev, **s == '+' ? PLUS : MINUS, 0, iter->left, NULL, iter);
@@ -424,16 +379,13 @@ void GetP (char** s, Tree<Nod>* tree, Nod* iter, const char varName) {
 
 void GetNum (char** s, Tree<Nod>* tree, Nod* iter, const char varName) {
 
-
     if (**s == varName) {
 
-        iter->type = X;
-        iter->val = 1;
+        tree->NodCtor (iter->prev, X, 1, NULL, NULL, iter);
         ++*s;
         return;
     }
     assert (**s >= '0' and **s <= '9');
-    iter->type = CONSTANT;
-    iter->val = strtod (*s, s);
+    tree->NodCtor (iter->prev, CONSTANT, strtod (*s, s), NULL, NULL, iter);
     return;
 }
