@@ -9,8 +9,6 @@ void simplify (Tree<Nod>* tree, Nod* iter) {
 
     killConstants (tree, iter);
     killXZero (tree, iter);
-    flog (iter);
-    dump (*tree);
     deXPow (tree, iter);
     divByX (tree, iter);
     xPower (tree, iter);
@@ -102,7 +100,7 @@ void xPower (Tree<Nod>* tree, Nod* iter) {
 
             printf ("Wrong nod type at nod %p\n", iter);
             dump((*tree));
-            exit (-1);
+            assert (iter->type == BLANK);
         break;
     }
 }
@@ -197,120 +195,103 @@ void killXZero (Tree<Nod>* tree, Nod* iter) {
     if (iter->type == X and iter->val == 0) tree->NodCtor (iter->prev, CONSTANT, 1, NULL, NULL, iter);
 }
 
-// Tree<Nod> differentiate (Tree<Nod>* tree) {
+Tree<Nod> differentiate (Tree<Nod>* tree) {
 
-//     Tree<Nod> diff;
-//     recDiff (&diff, diff.getdata (), tree, tree->getdata ());
-//     simplify (&diff, diff.getdata ());
-//     return diff;
-// }
+    Tree<Nod> diff;
+    recDiff (&diff, diff.getdata (), tree, tree->getdata ());
+    simplify (&diff, diff.getdata ());
+    return diff;
+}
 
-// void recDiff (Tree<Nod>* derivative, Nod* dIter, Tree<Nod>* func, Nod* fIter) {
+void recDiff (Tree<Nod>* derivative, Nod* dIter, Tree<Nod>* func, Nod* fIter) {
 
-//     if (fIter == NULL) return;
+    if (fIter == NULL) return;
 
-//     flog (dIter);
-//     dump (*derivative);
-//     if (fIter->left != NULL and fIter->right != NULL) {
+    flog (fIter);
+    flog (dIter);
+    dump (*derivative);
 
-//         derivative->NodAddLeft (dIter);
-//         derivative->NodAddRight (dIter);
-//         recDiff (derivative, dIter->left, func, fIter->left);
-//         recDiff (derivative, dIter->right, func, fIter->right);
+    if (fIter->left != NULL and fIter->right != NULL) {
 
-//         derivative->verifyHash ();
-//         dIter->type = fIter->type;
-//         derivative->countHash ();
+        derivative->NodAddLeft (dIter);
+        derivative->NodAddRight (dIter);
+        recDiff (derivative, dIter->left, func, fIter->left);
+        recDiff (derivative, dIter->right, func, fIter->right);
 
-//         if (dIter->type == PLUS or dIter->type == MINUS) return;
-//         if (dIter->type == MULT) {
+        derivative->NodCtor (dIter->prev, fIter->type, dIter->val, dIter->left, dIter->right, dIter);
 
-//             if (dIter->left->type == CONSTANT and dIter->right->type != CONSTANT) {
+        if (dIter->type == PLUS or dIter->type == MINUS) return;
 
-//                 derivative->verifyHash ();
-//                 dIter->left->val = fIter->left->val;
-//                 derivative->countHash ();
-//             }
-//             else if (dIter->left->type != CONSTANT and dIter->right->type == CONSTANT) {
+        if (dIter->type == MULT) {
 
-//                 derivative->verifyHash ();
-//                 dIter->right->val = fIter->right->val;
-//                 derivative->countHash ();
-//             }
-//             else if (dIter->left->type != CONSTANT and dIter->right->type != CONSTANT) {
+            if (dIter->left->type == CONSTANT and dIter->right->type != CONSTANT)
+                derivative->NodCtor (dIter, dIter->left->type, fIter->left->val, dIter->left->left, dIter->left->right, dIter->left);
 
-//                 derivative->TreeMoveToLeft (dIter->left, MULT, 0);
-//                 derivative->NodAddRight (dIter->left);
-//                 derivative->TreeCpy (dIter->left, fIter->left);
+            else if (dIter->left->type != CONSTANT and dIter->right->type == CONSTANT)
+                derivative->NodCtor (dIter, dIter->right->type, fIter->right->val, dIter->right->left, dIter->right->right, dIter->right);
 
-//                 derivative->NodCtor (dIter->prev, PLUS, 0, dIter->left, dIter->right, dIter);
+            else if (dIter->left->type != CONSTANT and dIter->right->type != CONSTANT) {
 
-//                 derivative->TreeMoveToLeft (dIter->right, MULT, 0);
-//                 derivative->NodAddRight (dIter->right);
-//                 derivative->TreeCpy (dIter->right, fIter->right);
-//             }
-//         }
-//         else if (dIter->type == DIV) {
+                derivative->NodMoveLeft (dIter->left, MULT, 0);
+                derivative->NodAddRight (dIter->left);
+                derivative->NodRecCpy (fIter->left, dIter->left);
 
-//             if (dIter->left->type == CONSTANT and dIter->right->type != CONSTANT) {
+                derivative->NodCtor (dIter->prev, PLUS, 0, dIter->left, dIter->right, dIter);
 
-//                 derivative->verifyHash ();
-//                 dIter->left->val = fIter->left->val;
-//                 derivative->countHash ();
-//             }
-//             else if (dIter->left->type != CONSTANT and dIter->right->type == CONSTANT) {
+                derivative->NodMoveLeft (dIter->right, MULT, 0);
+                derivative->NodAddRight (dIter->right);
+                derivative->NodRecCpy (fIter->right, dIter->right);
+            }
+        }
+        else if (dIter->type == DIV) {
 
-//                 derivative->verifyHash ();
-//                 dIter->right->val = dIter->right->val;
-//                 derivative->countHash ();
-//             }
-//             else if (dIter->left->type != CONSTANT and dIter->right->type != CONSTANT) {
+            if (dIter->left->type == CONSTANT and dIter->right->type != CONSTANT)
+                derivative->NodCtor (dIter, dIter->left->type, fIter->left->val, dIter->left->left, dIter->left->right, dIter->left);
 
-//                 derivative->TreeMoveToLeft (dIter->left, MINUS, 0);
-//                 derivative->TreeMoveToLeft (dIter->left->left, MULT, 0);
-//                 derivative->NodAddRight (dIter->left->left);
-//                 derivative->TreeCpy (dIter->left->left->right, fIter->left);
+            else if (dIter->left->type != CONSTANT and dIter->right->type == CONSTANT)
+                derivative->NodCtor (dIter, dIter->right->type, fIter->right->val, dIter->right->left, dIter->right->right, dIter->right);
 
-//                 derivative->NodAddRight (dIter->left);
-//                 derivative->TreeCpy (dIter->left->right, dIter->right);
-//                 derivative->TreeMoveToLeft (dIter->left->right, MULT, 0);
-//                 derivative->NodAddRight (dIter->left->right);
-//                 derivative->TreeCpy (dIter->left->right, fIter->right);
+            else if (dIter->left->type != CONSTANT and dIter->right->type != CONSTANT) {
 
-//                 derivative->TreeMoveToLeft (dIter->right, POWER, 0);
-//                 derivative->NodAddRight (dIter->right, CONSTANT, 2);
-//             }
-//         }
-//     }
-//     else {
+                derivative->NodMoveLeft (dIter->left, MINUS, 0);
+                derivative->NodMoveLeft (dIter->left->left, MULT, 0);
+                derivative->NodAddRight (dIter->left->left);
+                derivative->NodRecCpy (fIter->left, dIter->left->left->right);
 
-//         if (fIter->type == X) {
+                derivative->NodAddRight (dIter->left);
+                derivative->NodRecCpy (dIter->right, dIter->left->right);
+                derivative->NodMoveLeft (dIter->left->right, MULT, 0);
+                derivative->NodAddRight (dIter->left->right);
+                derivative->NodRecCpy (fIter->right, dIter->left->right);
 
-//             derivative->NodAddLeft (dIter, CONSTANT, fIter->val);
-//             derivative->NodAddRight (dIter, X, fIter->val - 1);
-//             derivative->verifyHash ();
-//             dIter->type = MULT;
-//             dIter->val = 0;
-//             derivative->countHash ();
-//         }
-//         else if (fIter->type == CONSTANT) {
+                derivative->NodMoveLeft (dIter->right, POWER, 0);
+                derivative->NodAddRight (dIter->right, CONSTANT, 2);
+            }
+        }
+    }
+    else {
 
-//             derivative->verifyHash ();
-//             dIter->type = CONSTANT;
-//             dIter->val = 0;
-//             derivative->countHash ();
-//         }
-//         else {
+        if (fIter->type == X) {
 
-//             flogprintf ("!!!!!!!!!!!!!!!!!!!!!!!!Something very wrong\n");
-//             flog (dIter);
-//             flog (fIter);
-//             dump (*derivative);
-//             dump (*func);
-//             //exit (-1);
-//         }
-//     }
-// }
+            derivative->NodAddLeft (dIter, CONSTANT, fIter->val);
+            derivative->NodAddRight (dIter, X, fIter->val - 1);
+            derivative->NodCtor (dIter->prev, MULT, 0, dIter->left, dIter->right, dIter);
+        }
+        else if (fIter->type == CONSTANT) {
+
+            derivative->NodCtor (dIter->prev, CONSTANT, 0, NULL, NULL, dIter);
+        }
+        else {
+
+            flogprintf ("!!!!!!!!!!!!!!!!!!!!!!!!Something very wrong\n");
+            flog (dIter);
+            flog (fIter);
+            dump (*derivative);
+            dump (*func);
+            assert (fIter->type == CONSTANT or fIter->type == X);
+        }
+    }
+}
 
 Tree<Nod> GetG (char* function, const char varName) {
 

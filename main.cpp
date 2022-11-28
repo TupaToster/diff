@@ -6,5 +6,7 @@ int main (int argc, char* argv[]) {
     dump (lol);
     simplify (&lol, lol.getdata ());
     dump (lol);
+    Tree<Nod> d = differentiate (&lol);
+    dump (d);
     lol.DTOR();
 }

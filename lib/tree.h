@@ -530,12 +530,12 @@ class Tree {
         if (src->left != NULL) {
 
             NodAddLeft (dst);
-            TreeCpy (dst->left, src->left);
+            NodRecCpy (src->left, dst->left);
         }
         if (src->right != NULL) {
 
             NodAddRight (dst);
-            TreeCpy (dst->right, src->right);
+            NodRecCpy (src->right, dst->right);
         }
         countHash ();
     }

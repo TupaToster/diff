@@ -1,16 +1,21 @@
-digraph List_10 {
+digraph List_7 {
 	graph [dpi = 100];
 	rankdir = TB
-	"Nod_0" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000000000000000 | Current = 000001ff51e11414 | type = MIN | Value = 0.000000 |{ <left> Left = 000001ff51e114b0 | <right> Right = 000001ff51e114e0} }"]
-	"Nod_1" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000001ff51e11414 | Current = 000001ff51e114b0 | type = CNST | Value = 16.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_2" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000001ff51e11414 | Current = 000001ff51e114e0 | type = MULT | Value = 0.000000 |{ <left> Left = 000001ff51e11510 | <right> Right = 000001ff51e11540} }"]
-	"Nod_3" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000001ff51e114e0 | Current = 000001ff51e11510 | type = CNST | Value = 8.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_4" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000001ff51e114e0 | Current = 000001ff51e11540 | type = X | Value = 3.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_0" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000000000000000 | Current = 0000014ec9c41574 | type = MIN | Value = 0.000000 |{ <left> Left = 0000014ec9c41450 | <right> Right = 0000014ec9c41480} }"]
+	"Nod_1" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000014ec9c41574 | Current = 0000014ec9c41450 | type = CNST | Value = 0.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_2" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000014ec9c41574 | Current = 0000014ec9c41480 | type = MULT | Value = 0.000000 |{ <left> Left = 0000014ec9c41660 | <right> Right = 0000014ec9c41690} }"]
+	"Nod_3" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000014ec9c41480 | Current = 0000014ec9c41660 | type = CNST | Value = 8.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_4" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000014ec9c41480 | Current = 0000014ec9c41690 | type = MULT | Value = 0.000000 |{ <left> Left = 0000014ec9c416c0 | <right> Right = 0000014ec9c416f0} }"]
+	"Nod_5" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000014ec9c41690 | Current = 0000014ec9c416c0 | type = CNST | Value = 3.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_6" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000014ec9c41690 | Current = 0000014ec9c416f0 | type = X | Value = 2.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
 	{ rank = same;  Nod_0; }
 	{ rank = same;  Nod_1;  Nod_2; }
 	{ rank = same;  Nod_3;  Nod_4; }
+	{ rank = same;  Nod_5;  Nod_6; }
 	"Nod_0":left -> "Nod_1";
 	"Nod_0":right -> "Nod_2";
 	"Nod_2":left -> "Nod_3";
 	"Nod_2":right -> "Nod_4";
+	"Nod_4":left -> "Nod_5";
+	"Nod_4":right -> "Nod_6";
 }
