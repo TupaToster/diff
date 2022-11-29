@@ -198,99 +198,109 @@ void killXZero (Tree<Nod>* tree, Nod* iter) {
 Tree<Nod> differentiate (Tree<Nod>* tree) {
 
     Tree<Nod> diff;
+    diff.NodRecCpy (tree->getdata (), diff.getdata ());
     recDiff (&diff, diff.getdata (), tree, tree->getdata ());
     simplify (&diff, diff.getdata ());
     return diff;
 }
 
-void recDiff (Tree<Nod>* derivative, Nod* dIter, Tree<Nod>* func, Nod* fIter) {
+void recDiff (Tree<Nod>* tree, Nod* iter, Tree<Nod>* func, Nod* fIter) {
 
-    if (fIter == NULL) return;
+    if (iter == NULL) return;
 
-    flog (fIter);
-    flog (dIter);
-    dump (*derivative);
+    if (iter->left != NULL and iter->right != NULL) {
 
-    if (fIter->left != NULL and fIter->right != NULL) {
+        recDiff (tree, iter->left, func, fIter->left);
+        recDiff (tree, iter->right, func, fIter->right);
 
-        derivative->NodAddLeft (dIter);
-        derivative->NodAddRight (dIter);
-        recDiff (derivative, dIter->left, func, fIter->left);
-        recDiff (derivative, dIter->right, func, fIter->right);
+        if (iter->type == PLUS or iter->type == MINUS) return;
 
-        derivative->NodCtor (dIter->prev, fIter->type, dIter->val, dIter->left, dIter->right, dIter);
+        if (iter->type == MULT) {
 
-        if (dIter->type == PLUS or dIter->type == MINUS) return;
+            if (iter->left->type == CONSTANT and iter->right->type != CONSTANT) tree->NodCtor (iter, fIter->left->type, fIter->left->val, fIter->left->left, fIter->left->right, iter->left);
+            else if (iter->left->type != CONSTANT and iter->right->type == CONSTANT) tree->NodCtor (iter, fIter->right->type, fIter->right->val, fIter->right->left, fIter->right->right, iter->right);
+            else {
 
-        if (dIter->type == MULT) {
+                tree->NodMoveLeft (iter->left, MULT, 0);
+                tree->NodAddRight (iter->left);
+                tree->NodRecCpy (fIter->left, iter->left->right);
 
-            if (dIter->left->type == CONSTANT and dIter->right->type != CONSTANT)
-                derivative->NodCtor (dIter, dIter->left->type, fIter->left->val, dIter->left->left, dIter->left->right, dIter->left);
+                tree->NodCtor (iter->prev, PLUS, 0, iter->left, iter->right, iter);
 
-            else if (dIter->left->type != CONSTANT and dIter->right->type == CONSTANT)
-                derivative->NodCtor (dIter, dIter->right->type, fIter->right->val, dIter->right->left, dIter->right->right, dIter->right);
-
-            else if (dIter->left->type != CONSTANT and dIter->right->type != CONSTANT) {
-
-                derivative->NodMoveLeft (dIter->left, MULT, 0);
-                derivative->NodAddRight (dIter->left);
-                derivative->NodRecCpy (fIter->left, dIter->left);
-
-                derivative->NodCtor (dIter->prev, PLUS, 0, dIter->left, dIter->right, dIter);
-
-                derivative->NodMoveLeft (dIter->right, MULT, 0);
-                derivative->NodAddRight (dIter->right);
-                derivative->NodRecCpy (fIter->right, dIter->right);
+                tree->NodMoveLeft (iter->right, MULT, 0);
+                tree->NodAddRight (iter->right);
+                tree->NodRecCpy (fIter->right, iter->right->right);
             }
         }
-        else if (dIter->type == DIV) {
+        else if (iter->type = DIV) {
 
-            if (dIter->left->type == CONSTANT and dIter->right->type != CONSTANT)
-                derivative->NodCtor (dIter, dIter->left->type, fIter->left->val, dIter->left->left, dIter->left->right, dIter->left);
+            if (iter->left->type == CONSTANT and iter->right->type != CONSTANT) tree->NodCtor (iter, iter->left->type, iter->left->val, iter->left->left, iter->left->right, iter);
+            else if (iter->left->type != CONSTANT and iter->right->type == CONSTANT) tree->NodCtor (iter, iter->right->type, iter->right->val, iter->right->left, iter->right->right, iter);
+            else {
 
-            else if (dIter->left->type != CONSTANT and dIter->right->type == CONSTANT)
-                derivative->NodCtor (dIter, dIter->right->type, fIter->right->val, dIter->right->left, dIter->right->right, dIter->right);
+                tree->NodMoveLeft (iter->left, MINUS, 0);
+                tree->NodMoveLeft (iter->left->left, MULT, 0);
+                tree->NodAddRight (iter->left->left);
+                tree->NodRecCpy (fIter->left, iter->left->left->right);
 
-            else if (dIter->left->type != CONSTANT and dIter->right->type != CONSTANT) {
+                tree->NodAddRight (iter->left);
+                tree->NodRecCpy (iter->right, iter->left->right);
+                tree->NodMoveLeft (iter->left->right, MULT, 0);
+                tree->NodAddRight (iter->left->right);
+                tree->NodRecCpy (fIter->right, iter->left->right->right);
 
-                derivative->NodMoveLeft (dIter->left, MINUS, 0);
-                derivative->NodMoveLeft (dIter->left->left, MULT, 0);
-                derivative->NodAddRight (dIter->left->left);
-                derivative->NodRecCpy (fIter->left, dIter->left->left->right);
 
-                derivative->NodAddRight (dIter->left);
-                derivative->NodRecCpy (dIter->right, dIter->left->right);
-                derivative->NodMoveLeft (dIter->left->right, MULT, 0);
-                derivative->NodAddRight (dIter->left->right);
-                derivative->NodRecCpy (fIter->right, dIter->left->right);
 
-                derivative->NodMoveLeft (dIter->right, POWER, 0);
-                derivative->NodAddRight (dIter->right, CONSTANT, 2);
+                tree->NodMoveLeft (iter->right, POWER, 0);
+                tree->NodAddRight (iter->right, CONSTANT, 2);
             }
         }
     }
     else {
 
-        if (fIter->type == X) {
+        if (iter->type == X) {
 
-            derivative->NodAddLeft (dIter, CONSTANT, fIter->val);
-            derivative->NodAddRight (dIter, X, fIter->val - 1);
-            derivative->NodCtor (dIter->prev, MULT, 0, dIter->left, dIter->right, dIter);
+            tree->NodAddLeft (iter, CONSTANT, iter->val);
+            tree->NodAddRight (iter, X, iter->val - 1);
+            tree->NodCtor (iter->prev, MULT, 0, iter->left, iter->right, iter);
         }
-        else if (fIter->type == CONSTANT) {
-
-            derivative->NodCtor (dIter->prev, CONSTANT, 0, NULL, NULL, dIter);
-        }
-        else {
-
-            flogprintf ("!!!!!!!!!!!!!!!!!!!!!!!!Something very wrong\n");
-            flog (dIter);
-            flog (fIter);
-            dump (*derivative);
-            dump (*func);
-            assert (fIter->type == CONSTANT or fIter->type == X);
-        }
+        else tree->NodCtor (iter->prev, CONSTANT, 0, NULL, NULL, iter);
     }
+}
+
+void writeTeX (Tree<Nod>* derivative, Nod* dIter, Tree<Nod>* func, Nod* fIter) {
+
+    static int actionCounter = 0;
+
+    const char* fileName = "derivative.tex";
+    FILE* outFile  = fopen (fileName, "a");
+
+    if (actionCounter == 0) {
+
+        fprintf (outFile, "\\documentclass[a4paper]{article}" "\n");
+        fprintf (outFile, "\\usepackage[a4paper,top=2cm,bottom=2cm,left=0.5cm,right=0.5cm,marginparwidth=1.75cm]{geometry}" "\n");
+        fprintf (outFile, "\\usepackage[]{graphicx}" "\n");
+        fprintf (outFile, "\\usepackage[]{wrapfig}" "\n");
+        fprintf (outFile, "\\usepackage[T2A]{fontenc}" "\n");
+        fprintf (outFile, "\\usepackage[utf8]{inputenc}" "\n");
+        fprintf (outFile, "\\usepackage[english, russian]{babel}" "\n");
+        fprintf (outFile, "\\usepackage[]{amsmath,amsfonts,amssymb,amsthm,mathtools}" "\n");
+        fprintf (outFile, "\\usepackage[]{wasysym}" "\n");
+        fprintf (outFile, "\\usepackage[]{float}" "\n");
+        fprintf (outFile, "\\usepackage{multicol}" "\n");
+        fprintf (outFile, "\\usepackage{mathtext}" "\n");
+        fprintf (outFile, "\\usepackage{amsmath}" "\n");
+        fprintf (outFile, "\\usepackage{amsfonts}" "\n");
+        fprintf (outFile, "\\usepackage{indentfirst}" "\n");
+        fprintf (outFile, "\\usepackage{longtable}" "\n");
+        fprintf (outFile, "\\usepackage{natbib}" "\n");
+        fprintf (outFile, "\\usepackage{mathrsfs}" "\n");
+        fprintf (outFile, "\\title{The legendary derivative}" "\n");
+        fprintf (outFile, "\\date{\\today}" "\n");
+        fprintf (outFile, "\\begin{document}" "\n");
+        fprintf (outFile, "\\maketitle" "\n");
+    }
+
 }
 
 Tree<Nod> GetG (char* function, const char varName) {
