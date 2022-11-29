@@ -1,12 +1,10 @@
 #include "protos.h"
+#include "lib/dynArray.h"
 
 int main (int argc, char* argv[]) {
 
-    Tree<Nod> lol = GetG ("12+4-8*x^3", 'x');
+    dynarray<int> lol (5);
+    *lol(4) = 4;
     dump (lol);
-    simplify (&lol, lol.getdata ());
-    dump (lol);
-    Tree<Nod> d = differentiate (&lol);
-    dump (d);
-    lol.DTOR();
+
 }

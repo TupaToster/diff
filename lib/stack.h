@@ -341,14 +341,14 @@ class Stack {
         if (delta > 0) {
 
             data = (ELEM_T*) calloc (capacity * sizeof (ELEM_T) * 2 + 2 * sizeof (unsigned int), 1);
-            memcpy (data, dataCanL, capacity * sizeof (ELEM_T) + 2 * sizeof (unsigned int)); //3  2
+            memcpy (data, dataCanL, capacity * sizeof (ELEM_T) + sizeof (unsigned int));
             capacity *= 2;
 
         }
         else if (delta < 0) {
 
             data = (ELEM_T*) calloc (capacity * sizeof (ELEM_T) / 2  + 2 * sizeof (unsigned int), 1);
-            memcpy (data, dataCanL, capacity * sizeof (ELEM_T) / 2 + 2 * sizeof (unsigned int));
+            memcpy (data, dataCanL, capacity * sizeof (ELEM_T) / 2 + sizeof (unsigned int));
             capacity /= 2;
         }
 
@@ -358,7 +358,7 @@ class Stack {
 
         data = (ELEM_T*) (((unsigned int*) data) + 1);
 
-        dataCanR = (unsigned int*) (data + capacity); //найдена ошибка
+        dataCanR = (unsigned int*) (data + capacity);
         *dataCanR = CANR;
 
         errCheck ();

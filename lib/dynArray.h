@@ -10,30 +10,9 @@
 #define dump(clas) ;
 #endif
 
-enum NodType {
-
-    BLANK    = 'KNLB',
-    CONSTANT = 'TSNC',
-    X        = 'X',
-    PLUS     = 'SULP',
-    MINUS    = 'NIM',
-    MULT     = 'TLUM',
-    DIV      = 'VID',
-    POWER    = 'WOP',
-};
-
-struct Nod {
-
-    Nod*    prev    = NULL;
-    NodType type    = BLANK;
-    int     val     = 0;
-    int     NodNum  = 0;
-    Nod*    left    = NULL;
-    Nod*    right   = NULL;
-};
 
 template<typename ELEM_T>
-class Tree {
+class dynarray {
 
     // constants
     static constexpr unsigned int       CANL      = 0xDEADBEEF; ///< Left cannary of a structure
@@ -63,6 +42,7 @@ class Tree {
     unsigned int   canL      = CANL; ///< left cannary of struct
     unsigned int   hash      = 0;    ///< hash value
     size_t         errCode   = ok;   ///< error code
+    size_t         size      = 0;
     ELEM_T*        data      = NULL; ///< Ptr to data
     unsigned int*  dataCanL  = NULL; ///< left cannary of data
     unsigned int*  dataCanR  = NULL; ///< right cannary of data
@@ -86,7 +66,7 @@ class Tree {
 
         errCheck ();
 
-        char names [11][40] = {};
+        char names [12][40] = {};
         int iter = 0;
         if (errCode & POISON_ACCESS        ) strcpy (names[iter++], "\t\t[POISON_ACCESS       ]<br>");
         if (errCode & BAD_CAN_L            ) strcpy (names[iter++], "\t\t[BAD_CAN_L           ]<br>");
@@ -162,119 +142,10 @@ class Tree {
         return errCode;
     }
 
-    // Nod part
-
-    void TreeGraphDump () {
-
-        static int GraphDumpCounter = 0;
-
-        if (GraphDumpCounter == 0) {
-
-            system ("rm *.png");
-        }
-
-        #define picprintf(...) fprintf (picSource, __VA_ARGS__)
-
-        char srcName[] = "GraphDumpSrc.dot";
-        char picName[30] = "GraphDumpPic";
-        sprintf (picName, "%d.png", GraphDumpCounter);
-
-        FILE* picSource = fopen (srcName, "w");
-        assert (picSource != NULL);
-
-        picprintf ("digraph List_%d {" "\n", GraphDumpCounter);
-        picprintf ("\t" "graph [dpi = 100];" "\n");
-        picprintf ("\t" "rankdir = TB" "\n");
-
-        int ranks[MAX_RANKS][MAX_RANKS + 1] = {0};
-        int NodNum = 0;
-
-        verifyHash ();
-
-        PrintNod (data, &NodNum, 0, picSource, ranks);
-
-        countHash ();
-
-        for (int i = 0; i < MAX_RANKS and ranks[i][0] != 0; i++) {
-
-            picprintf ("\t" "{ rank = same; ");
-
-            for (int j = 1; j <= ranks[i][0];j++) {
-
-                picprintf (" Nod_%d; ", ranks[i][j]);
-            }
-
-            picprintf ("}\n");
-        }
-
-        PrintConnections (data, picSource);
-
-        picprintf ( "}");
-
-        fclose (picSource);
-
-        char command[200] = "";
-        sprintf (command, "D:\\Graphviz\\bin\\dot.exe -Tpng %s -o %s", srcName, picName);
-
-        system (command);
-
-        flogprintf("<h2>Tree dump</h2>\n");
-        flogprintf("<img src = \"%s\" style = \"width: 55%%; height: auto\"/>\n", picName);
-
-        GraphDumpCounter++;
-
-        #undef picprintf
-    }
-
-    void PrintConnections (ELEM_T* nod, FILE* picSource) {
-
-        #define picprintf(...) fprintf (picSource, __VA_ARGS__)
-
-        if (nod->left != NULL) {
-
-            picprintf ("\t" "\"Nod_%d\":left -> \"Nod_%d\";\n", nod->NodNum, nod->left->NodNum);
-            PrintConnections (nod->left, picSource);
-        }
-        if (nod->right != NULL) {
-
-            picprintf ("\t" "\"Nod_%d\":right -> \"Nod_%d\";\n", nod->NodNum, nod->right->NodNum);
-            PrintConnections (nod->right, picSource);
-        }
-
-        #undef picprintf
-    }
-
-    void PrintNod (ELEM_T* nod, int* NodNumber, int depth, FILE* picSource, int ranks[][MAX_RANKS + 1]) {
-
-        #define picprintf(...) fprintf (picSource, __VA_ARGS__)
-
-        verifyHash ();
-        nod->NodNum = *NodNumber;
-        countHash ();
-
-        ranks[depth][0]++;
-        ranks[depth][ranks[depth][0]] = *NodNumber;
-
-        picprintf ("\t" "\"Nod_%d\" [shape = \"Mrecord\", style = \"filled\", fillcolor = \"#9feb83\", label = \"{ <prev> Prev = %p | Current = %p | type = %.4s | Value = %f |{ <left> Left = %p | <right> Right = %p} }\"]\n",
-                    *NodNumber, nod->prev, nod, &nod->type, (double) nod->val, nod->left, nod->right);
-
-        *NodNumber += 1;
-        if (nod->left != NULL) {
-
-            PrintNod(nod->left, NodNumber, depth + 1, picSource, ranks);
-        }
-        if (nod->right != NULL) {
-
-            PrintNod (nod->right, NodNumber, depth + 1, picSource, ranks);
-        }
-
-        #undef picprintf
-    }
-
     public:
 
-    Tree (unsigned int _size = 1) :
-        canL (CANL), canR (CANR), hash(0), errCode (ok) {
+    dynarray (unsigned int _size = 4) :
+        canL (CANL), canR (CANR), hash(0), errCode (ok), size (_size) {
 
         dataCanL = (unsigned int*) calloc (sizeof (ELEM_T) * _size + 2 * sizeof (unsigned int), 1);
         assert (dataCanL != NULL);
@@ -376,7 +247,7 @@ class Tree {
 
         errCheck ();
 
-        flogprintf ("<pre>" "In file %s, function %s, line %llu, Tree named %s was dumped : <br>",
+        flogprintf ("<pre>" "In file %s, function %s, line %llu, dynarray named %s was dumped : <br>",
             fileName, funcName, line, name);
 
         flogprintf ("\t" "Errors : <br>");
@@ -397,6 +268,15 @@ class Tree {
         else if ( canR      == CANR    ) flogprintf ( "ok)<br>")
         else                             flogprintf ( "NOT_OK)<br>")
 
+
+                                         flogprintf ("\t" "size = %u (", size);
+        if      (isPoison (&size)      ) flogprintf ("POISONED)" "<br>")
+        else                             flogprintf ("ok)" "<br>")
+
+                                         flogprintf ("\t" "size = %u (", size);
+        if      (isPoison (&size)  ) flogprintf ("POISONED)" "<br>")
+        else                             flogprintf ("ok)" "<br>")
+
                                          flogprintf ( "\t" "dataCanL = 0x%X (", *dataCanL);
         if      (isPoison (dataCanL)   ) flogprintf ( "POISONED)<br>")
         else if (*dataCanL == CANL     ) flogprintf ( "ok)<br>")
@@ -409,133 +289,60 @@ class Tree {
 
         if (!isPoison (data) and data != NULL) {
 
-            TreeGraphDump ();
+            for (int i = 0; i < size; i++) {
+
+                flogprintf ("| %.8d |", i);
+            }
+            flogprintf ("<br>");
+            for (int i = 0; i < size; i++) {
+
+                flogprintf ("|0x%.8X|", data[i]);
+            }
+            flogprintf ("<br>");
         }
 
         flogprintf ("</pre><hr>\n");
         countHash ();
     }
 
-    //Nod part
+    // Array part
 
-    ELEM_T* NodCtor (ELEM_T* prev = NULL, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL, ELEM_T* current = NULL) {
+    ELEM_T operator[] (int iter) {
 
-        verifyHash ();
-        ELEM_T* retVal = (current == NULL ? (ELEM_T*) calloc (1, sizeof (ELEM_T)) : current);
-        assert (retVal != NULL);
-
-        retVal->prev    = prev;
-        retVal->type    = type;
-        retVal->val     = val;
-        retVal->left    = left;
-        retVal->right   = right;
-        countHash ();
-        return retVal;
+        return this->getdata()[iter];
     }
 
-    void NodDtorRec (ELEM_T* iter = NULL) {
+    ELEM_T* operator() (int iter) {
 
-        if (iter == NULL) return;
-
-        verifyHash ();
-        setPoison (&iter->type);
-        setPoison (&iter->val);
-
-        NodDtorRec (iter->left);
-        NodDtorRec (iter->right);
-
-        setPoison (&iter->left);
-        setPoison (&iter->right);
-
-        if (iter->prev != NULL)
-            if (iter->prev->left == iter) iter->prev->left = NULL;
-            else iter->prev->right = NULL;
-
-        setPoison (&iter->prev);
-        free (iter);
-        countHash ();
+        return this->getdata() + iter;
     }
 
-    ELEM_T* NodAddRight (ELEM_T* iter, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL) {
+    void resize (int par = 1) {
 
-        assert (iter != NULL);
-        verifyHash ();
+        errCheck ();
 
-        iter->right = NodCtor (iter, type, val, left, right);
-        assert (iter->right != NULL);
+        if (par >= 0) {
 
-        countHash ();
-        return iter->right;
-    }
-
-    ELEM_T* NodAddLeft (ELEM_T* iter, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL) {
-
-        assert (iter != NULL);
-        verifyHash ();
-
-        iter->left = NodCtor (iter, type, val, left, right);
-        assert (iter->left != NULL);
-
-        countHash ();
-        return iter->right;
-    }
-
-    void NodMoveLeft (ELEM_T* iter, NodType type = BLANK, double val = 0) {
-
-        NodAddLeft (iter, iter->type, iter->val, iter->left, iter->right);
-        NodCtor (iter->prev, type, val, iter->left, NULL, iter);
-        if (iter->left->left != NULL) iter->left->left->prev = iter->left;
-        if (iter->left->right != NULL) iter->left->right->prev = iter->left;
-        countHash ();
-    }
-
-    void NodMoveRight (ELEM_T* iter, NodType type = BLANK, double val = 0) {
-
-        NodAddRight (iter, iter->type, iter->val, iter->left, iter->right);
-        NodCtor (iter->prev, type, val, iter->left, NULL, iter);
-        if (iter->right->left != NULL) iter->right->left = iter->right;
-        if (iter->right->right != NULL) iter->right->right = iter->right;
-        countHash ();
-    }
-
-    void NodUnMoveRight (ELEM_T* iter) {
-
-        ELEM_T* right = iter->right;
-        NodCtor (iter->prev, iter->right->type, iter->right->type, iter->right->left, iter->right->right, iter);
-        NodCtor (NULL, BLANK, 0, NULL, NULL, right);
-        NodDtorRec (right);
-        if (iter->right != NULL) iter->right->prev = iter;
-        if (iter->left != NULL) iter->left->prev = iter;
-        countHash ();
-    }
-
-    void NodUnMoveLeft (ELEM_T* iter) {
-
-        ELEM_T* left = iter->left;
-        NodCtor (iter->prev, iter->left->type, iter->left->type, iter->left->left, iter->left->right, iter);
-        NodCtor (NULL, BLANK, 0, NULL, NULL, left);
-        NodDtorRec (left);
-        if (iter->right != NULL) iter->right->prev = iter;
-        if (iter->left != NULL) iter->left->prev = iter;
-        countHash ();
-    }
-
-    void NodRecCpy (ELEM_T* src, ELEM_T* dst) {
-
-        assert (dst != NULL);
-        assert (src != NULL);
-
-        dst = NodCtor (dst->prev, src->type, src->val, NULL, NULL, dst);
-        if (src->left != NULL) {
-
-            NodAddLeft (dst);
-            NodRecCpy (src->left, dst->left);
+            data = (ELEM_T*) calloc (sizeof (ELEM_T) * size * 2 + 2 * sizeof (unsigned int), 1);
+            assert (data != NULL);
+            memcpy (data, dataCanL, sizeof (ELEM_T) * size + sizeof (unsigned int));
+            size *= 2;
         }
-        if (src->right != NULL) {
+        else {
 
-            NodAddRight (dst);
-            NodRecCpy (src->right, dst->right);
+            size /= 2;
+            data = (ELEM_T*) calloc (sizeof (ELEM_T) * size + 2 * sizeof (unsigned int), 1);
+            assert (data != NULL);
+            memcpy (data, dataCanL, sizeof (ELEM_T) * size + sizeof (unsigned int));
         }
-        countHash ();
+
+        free (dataCanL);
+        dataCanL = data;
+        data = (ELEM_T*)(dataCanL + 1);
+        dataCanR = (unsigned int*) (data + size);
+       *dataCanR = CANR;
+
+       countHash ();
     }
+
 };
