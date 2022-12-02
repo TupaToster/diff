@@ -28,6 +28,7 @@ struct Nod {
     NodType type    = BLANK;
     int     val     = 0;
     int     NodNum  = 0;
+    int     diff    = 0;
     Nod*    left    = NULL;
     Nod*    right   = NULL;
 };
@@ -240,6 +241,10 @@ class Tree {
             picprintf ("\t" "\"Nod_%d\":right -> \"Nod_%d\";\n", nod->NodNum, nod->right->NodNum);
             PrintConnections (nod->right, picSource);
         }
+        if (nod->prev != NULL) {
+
+            picprintf ("\t" "\"Nod_%d\":prev -> \"Nod_%d\";\n", nod->NodNum, nod->prev->NodNum);
+        }
 
         #undef picprintf
     }
@@ -419,9 +424,9 @@ class Tree {
 
     //Nod part
 
-    ELEM_T* NodCtor (ELEM_T* prev = NULL, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL, ELEM_T* current = NULL) {
+    ELEM_T* NodCtor (ELEM_T* prev = NULL, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL, ELEM_T* current = NULL, int NodNum = 0, int diff = 0) {
 
-        verifyHash ();
+        errCheck ();
         ELEM_T* retVal = (current == NULL ? (ELEM_T*) calloc (1, sizeof (ELEM_T)) : current);
         assert (retVal != NULL);
 
@@ -430,6 +435,8 @@ class Tree {
         retVal->val     = val;
         retVal->left    = left;
         retVal->right   = right;
+        retVal->diff    = diff;
+        retVal->NodNum  = NodNum;
         countHash ();
         return retVal;
     }
@@ -438,9 +445,11 @@ class Tree {
 
         if (iter == NULL) return;
 
-        verifyHash ();
+        errCheck ();
         setPoison (&iter->type);
         setPoison (&iter->val);
+        setPoison (&iter->NodNum);
+        setPoison (&iter->diff);
 
         NodDtorRec (iter->left);
         NodDtorRec (iter->right);
@@ -459,8 +468,12 @@ class Tree {
 
     ELEM_T* NodAddRight (ELEM_T* iter, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL) {
 
+        if (iter->prev != NULL) {
+            if (iter->prev->left != iter and iter->prev->right != iter) dumpInside ("blyat", __FILE__, __FUNCTION__, __LINE__);
+            assert (iter->prev->left == iter or iter->prev->right == iter);
+        }
         assert (iter != NULL);
-        verifyHash ();
+        errCheck ();
 
         iter->right = NodCtor (iter, type, val, left, right);
         assert (iter->right != NULL);
@@ -471,8 +484,12 @@ class Tree {
 
     ELEM_T* NodAddLeft (ELEM_T* iter, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL) {
 
+        if (iter->prev != NULL) {
+            if (iter->prev->left != iter and iter->prev->right != iter) dumpInside ("blyat", __FILE__, __FUNCTION__, __LINE__);
+            assert (iter->prev->left == iter or iter->prev->right == iter);
+        }
         assert (iter != NULL);
-        verifyHash ();
+        errCheck ();
 
         iter->left = NodCtor (iter, type, val, left, right);
         assert (iter->left != NULL);
@@ -483,6 +500,11 @@ class Tree {
 
     void NodMoveLeft (ELEM_T* iter, NodType type = BLANK, double val = 0) {
 
+        if (iter->prev != NULL) {
+            if (iter->prev->left != iter and iter->prev->right != iter) dumpInside ("blyat", __FILE__, __FUNCTION__, __LINE__);
+            assert (iter->prev->left == iter or iter->prev->right == iter);
+        }
+        errCheck ();
         NodAddLeft (iter, iter->type, iter->val, iter->left, iter->right);
         NodCtor (iter->prev, type, val, iter->left, NULL, iter);
         if (iter->left->left != NULL) iter->left->left->prev = iter->left;
@@ -492,17 +514,27 @@ class Tree {
 
     void NodMoveRight (ELEM_T* iter, NodType type = BLANK, double val = 0) {
 
+        if (iter->prev != NULL) {
+            if (iter->prev->left != iter and iter->prev->right != iter) dumpInside ("blyat", __FILE__, __FUNCTION__, __LINE__);
+            assert (iter->prev->left == iter or iter->prev->right == iter);
+        }
+        errCheck ();
         NodAddRight (iter, iter->type, iter->val, iter->left, iter->right);
-        NodCtor (iter->prev, type, val, iter->left, NULL, iter);
-        if (iter->right->left != NULL) iter->right->left = iter->right;
-        if (iter->right->right != NULL) iter->right->right = iter->right;
+        NodCtor (iter->prev, type, val, NULL, iter->right, iter);
+        if (iter->right->left != NULL) iter->right->left->prev = iter->right;
+        if (iter->right->right != NULL) iter->right->right->prev = iter->right;
         countHash ();
     }
 
     void NodUnMoveRight (ELEM_T* iter) {
 
+        if (iter->prev != NULL) {
+            if (iter->prev->left != iter and iter->prev->right != iter) dumpInside ("blyat", __FILE__, __FUNCTION__, __LINE__);
+            assert (iter->prev->left == iter or iter->prev->right == iter);
+        }
+        errCheck ();
         ELEM_T* right = iter->right;
-        NodCtor (iter->prev, iter->right->type, iter->right->type, iter->right->left, iter->right->right, iter);
+        NodCtor (iter->prev, iter->right->type, iter->right->val, iter->right->left, iter->right->right, iter);
         NodCtor (NULL, BLANK, 0, NULL, NULL, right);
         NodDtorRec (right);
         if (iter->right != NULL) iter->right->prev = iter;
@@ -512,8 +544,13 @@ class Tree {
 
     void NodUnMoveLeft (ELEM_T* iter) {
 
+        if (iter->prev != NULL) {
+            if (iter->prev->left != iter and iter->prev->right != iter) dumpInside ("blyat", __FILE__, __FUNCTION__, __LINE__);
+            assert (iter->prev->left == iter or iter->prev->right == iter);
+        }
+        errCheck ();
         ELEM_T* left = iter->left;
-        NodCtor (iter->prev, iter->left->type, iter->left->type, iter->left->left, iter->left->right, iter);
+        NodCtor (iter->prev, iter->left->type, iter->left->val, iter->left->left, iter->left->right, iter);
         NodCtor (NULL, BLANK, 0, NULL, NULL, left);
         NodDtorRec (left);
         if (iter->right != NULL) iter->right->prev = iter;
@@ -526,6 +563,7 @@ class Tree {
         assert (dst != NULL);
         assert (src != NULL);
 
+        errCheck ();
         dst = NodCtor (dst->prev, src->type, src->val, NULL, NULL, dst);
         if (src->left != NULL) {
 

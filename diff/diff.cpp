@@ -1,5 +1,82 @@
 #include "diff.h"
 
+
+void researchFunc (char* function, const char* fileName, char varName) {
+
+    assert (function != NULL);
+    assert (fileName != NULL);
+
+    FILE* outFile = fopen (fileName, "w");
+    assert (outFile != NULL);
+
+    if (true) {
+
+        int unix_time = 0;
+        int sec = 0;
+        int min = 0;
+        int hrs = 0;
+
+        sscanf (__TIME__, "%d%*c%d%*c%d", &hrs, &min, &sec);
+        unix_time = hrs*3600 + min*60 + sec;
+        srand (unix_time);
+    }
+
+    fprintf (outFile, "\\documentclass[a4paper]{article}" "\n");
+    fprintf (outFile, "\\usepackage[a4paper,top=2cm,bottom=2cm,left=0.5cm,right=0.5cm,marginparwidth=1.75cm]{geometry}" "\n");
+    fprintf (outFile, "\\usepackage[]{graphicx}" "\n");
+    fprintf (outFile, "\\usepackage[]{wrapfig}" "\n");
+    fprintf (outFile, "\\usepackage[T2A]{fontenc}" "\n");
+    fprintf (outFile, "\\usepackage[utf8]{inputenc}" "\n");
+    fprintf (outFile, "\\usepackage[english, russian]{babel}" "\n");
+    fprintf (outFile, "\\usepackage[]{amsmath,amsfonts,amssymb,amsthm,mathtools}" "\n");
+    fprintf (outFile, "\\usepackage[]{wasysym}" "\n");
+    fprintf (outFile, "\\usepackage[]{float}" "\n");
+    fprintf (outFile, "\\usepackage{multicol}" "\n");
+    fprintf (outFile, "\\usepackage{mathtext}" "\n");
+    fprintf (outFile, "\\usepackage{amsmath}" "\n");
+    fprintf (outFile, "\\usepackage{amsfonts}" "\n");
+    fprintf (outFile, "\\usepackage{indentfirst}" "\n");
+    fprintf (outFile, "\\usepackage{longtable}" "\n");
+    fprintf (outFile, "\\usepackage{natbib}" "\n");
+    fprintf (outFile, "\\usepackage{mathrsfs}" "\n");
+    fprintf (outFile, "\\title{Исследование неизвестной на момент заголовка функции}" "\n");
+    fprintf (outFile, "\\date{\\today}" "\n");
+    fprintf (outFile, "\\begin{document}" "\n");
+    fprintf (outFile, "\\maketitle" "\n");
+
+    fprintf (outFile, "\\section{Введение в проблему}" "\n");
+
+    Tree<Nod> func = GetG (function, varName);
+    fprintf (outFile, "На операционном столе сегодня находится следующая функция:\\\\" "\n"
+                       "f(%c) = $", varName);
+    printFunc (outFile, &func, func.getdata ());
+    fprintf (outFile, "$\\\\" "\n"
+                      "После некоторых очевиднейших преобразований получаем :\\\\" "\n"
+                      "f(%c) = $", varName);
+    simplify (&func, func.getdata());
+    printFunc (outFile, &func, func.getdata());
+    fprintf (outFile, "$\\" "\n");
+
+    fprintf (outFile, "\\section{Нахождение первой производной}" "\n"
+                      "Найдем $f\\prime(%c)$ :\\\\", varName);
+
+    Tree<Nod> diff1 = differentiate (&func, outFile, varName);
+
+    fprintf (outFile, "Имеем $f\\prime(%c) = ", varName);
+    printFunc (outFile, &diff1, diff1.getdata ());
+    fprintf (outFile, "$\\\\" "\n");
+
+    fprintf (outFile, "\\section{Нахождение второй производной}" "\n"
+                      "Имеем $f\\prime\\prime(%c)$", varName);
+    Tree<Nod> diff2 = differentiate (&diff1, outFile, varName);
+
+    fprintf (outFile, "Имеем $f\\prime\\prime(%c) = ", varName);
+    printFunc (outFile, &diff2, diff2.getdata ());
+    fprintf (outFile, "$\\\\" "\n");
+
+    fprintf (outFile, "\\end{document}");
+}
+
 void simplify (Tree<Nod>* tree, Nod* iter) {
 
     if (iter == NULL) return;
@@ -17,6 +94,7 @@ void simplify (Tree<Nod>* tree, Nod* iter) {
 
 void killConstants (Tree<Nod>* tree, Nod* iter) {
 
+    assert ((iter->left != NULL and iter->right != NULL) or (iter->left == NULL and iter->right == NULL));
     if (iter->left == NULL or iter->right == NULL) return;
 
     if (iter->left->type == CONSTANT and iter->right->type == CONSTANT) {
@@ -57,6 +135,7 @@ void killConstants (Tree<Nod>* tree, Nod* iter) {
 
 void xPower (Tree<Nod>* tree, Nod* iter) {
 
+    assert ((iter->left != NULL and iter->right != NULL) or (iter->left == NULL and iter->right == NULL));
     if (iter->left == NULL or iter->right == NULL) return;
 
     if (iter->left->type != X or iter->right->type != X) return;
@@ -107,6 +186,7 @@ void xPower (Tree<Nod>* tree, Nod* iter) {
 
 void divByX (Tree<Nod>* tree, Nod* iter) {
 
+    assert ((iter->left != NULL and iter->right != NULL) or (iter->left == NULL and iter->right == NULL));
     if (iter->left == NULL or iter->right == NULL) return;
 
     if (iter->type == DIV and iter->right->type == X) {
@@ -118,6 +198,7 @@ void divByX (Tree<Nod>* tree, Nod* iter) {
 
 void deXPow (Tree<Nod>* tree, Nod* iter) {
 
+    assert ((iter->left != NULL and iter->right != NULL) or (iter->left == NULL and iter->right == NULL));
     if (iter->left == NULL or iter->right == NULL) return;
 
     if (iter->left->type == X and iter->right->type == CONSTANT and iter->type == POWER) {
@@ -131,6 +212,7 @@ void deXPow (Tree<Nod>* tree, Nod* iter) {
 
 void killNeutral (Tree<Nod>* tree, Nod* iter) {
 
+    assert ((iter->left != NULL and iter->right != NULL) or (iter->left == NULL and iter->right == NULL));
     if (iter->type == PLUS) {
 
         if (iter->left->type == CONSTANT and iter->left->val == 0) {
@@ -192,115 +274,171 @@ void killNeutral (Tree<Nod>* tree, Nod* iter) {
 
 void killXZero (Tree<Nod>* tree, Nod* iter) {
 
+    assert ((iter->left != NULL and iter->right != NULL) or (iter->left == NULL and iter->right == NULL));
     if (iter->type == X and iter->val == 0) tree->NodCtor (iter->prev, CONSTANT, 1, NULL, NULL, iter);
 }
 
-Tree<Nod> differentiate (Tree<Nod>* tree) {
+Tree<Nod> differentiate (Tree<Nod>* tree, FILE* outFile, char varName) {
 
     Tree<Nod> diff;
     diff.NodRecCpy (tree->getdata (), diff.getdata ());
-    recDiff (&diff, diff.getdata (), tree, tree->getdata ());
+    setDiffStatus (&diff, diff.getdata (), 1);
+    setDiffStatus (&diff, diff.getdata ()->left, 0);
+    setDiffStatus (&diff, diff.getdata ()->right, 0);
+    recDiff (&diff, diff.getdata (), outFile, varName);
     simplify (&diff, diff.getdata ());
     return diff;
 }
 
-void recDiff (Tree<Nod>* tree, Nod* iter, Tree<Nod>* func, Nod* fIter) {
+void setDiffStatus (Tree<Nod>* tree, Nod* iter, int diff) {
 
     if (iter == NULL) return;
 
+    tree->NodCtor (iter->prev, iter->type, iter->val, iter->left, iter->right, iter, 0, diff);
+
+    setDiffStatus (tree, iter->left, diff);
+    setDiffStatus (tree, iter->right, diff);
+}
+
+void recDiff (Tree<Nod>* tree, Nod* iter, FILE* outFile, char varName) {
+
+    if (iter == NULL) return;
+
+    tree->NodCtor (iter->prev, iter->type, iter->val, iter->left, iter->right, iter, 0, 0);
     if (iter->left != NULL and iter->right != NULL) {
 
-        recDiff (tree, iter->left, func, fIter->left);
-        recDiff (tree, iter->right, func, fIter->right);
+        if (iter->type == PLUS or iter->type == MINUS) {
 
-        if (iter->type == PLUS or iter->type == MINUS) return;
+            tree->NodCtor (iter, iter->left->type, iter->left->val, iter->left->left, iter->left->right, iter->left, 0, 1);
+            tree->NodCtor (iter, iter->right->type, iter->right->val, iter->right->left, iter->right->right, iter->right, 0, 1);
+            writeFuncTex (tree, outFile, varName);
 
-        if (iter->type == MULT) {
-
-            if (iter->left->type == CONSTANT and iter->right->type != CONSTANT) tree->NodCtor (iter, fIter->left->type, fIter->left->val, fIter->left->left, fIter->left->right, iter->left);
-            else if (iter->left->type != CONSTANT and iter->right->type == CONSTANT) tree->NodCtor (iter, fIter->right->type, fIter->right->val, fIter->right->left, fIter->right->right, iter->right);
-            else {
-
-                tree->NodMoveLeft (iter->left, MULT, 0);
-                tree->NodAddRight (iter->left);
-                tree->NodRecCpy (fIter->left, iter->left->right);
-
-                tree->NodCtor (iter->prev, PLUS, 0, iter->left, iter->right, iter);
-
-                tree->NodMoveLeft (iter->right, MULT, 0);
-                tree->NodAddRight (iter->right);
-                tree->NodRecCpy (fIter->right, iter->right->right);
-            }
+            recDiff (tree, iter->left, outFile, varName);
+            recDiff (tree, iter->right, outFile, varName);
         }
-        else if (iter->type = DIV) {
+        else if (iter->type == MULT) {
 
-            if (iter->left->type == CONSTANT and iter->right->type != CONSTANT) tree->NodCtor (iter, iter->left->type, iter->left->val, iter->left->left, iter->left->right, iter);
-            else if (iter->left->type != CONSTANT and iter->right->type == CONSTANT) tree->NodCtor (iter, iter->right->type, iter->right->val, iter->right->left, iter->right->right, iter);
-            else {
+            tree->NodMoveLeft (iter, PLUS, 0);
+            tree->NodAddRight (iter);
+            tree->NodRecCpy (iter->left, iter->right);
 
-                tree->NodMoveLeft (iter->left, MINUS, 0);
-                tree->NodMoveLeft (iter->left->left, MULT, 0);
-                tree->NodAddRight (iter->left->left);
-                tree->NodRecCpy (fIter->left, iter->left->left->right);
+            tree->NodCtor (iter->left, iter->left->left->type, iter->left->left->val, iter->left->left->left, iter->left->left->right, iter->left->left, 0, 1);
+            tree->NodCtor (iter->right, iter->right->right->type, iter->right->right->val, iter->right->right->left, iter->right->right->right, iter->right->right, 0, 1);
+            writeFuncTex (tree, outFile, varName);
 
-                tree->NodAddRight (iter->left);
-                tree->NodRecCpy (iter->right, iter->left->right);
-                tree->NodMoveLeft (iter->left->right, MULT, 0);
-                tree->NodAddRight (iter->left->right);
-                tree->NodRecCpy (fIter->right, iter->left->right->right);
+            recDiff (tree, iter->left->left, outFile, varName);
+            recDiff (tree, iter->right->right, outFile, varName);
+        }
+        else if (iter->type == DIV) {
 
+            tree->NodMoveLeft (iter, DIV, 0);
+            tree->NodAddRight (iter, POWER, 0);
+            tree->NodAddLeft (iter->right);
+            tree->NodAddRight (iter->right, CONSTANT, 2);
+            tree->NodRecCpy (iter->left->right, iter->right->left);
 
+            tree->NodCtor (iter, MULT, 0, iter->left->left, iter->left->right, iter->left);
+            tree->NodMoveLeft (iter->left, MINUS, 0);
+            tree->NodAddRight (iter->left);
+            tree->NodRecCpy (iter->left->left, iter->left->right);
 
-                tree->NodMoveLeft (iter->right, POWER, 0);
-                tree->NodAddRight (iter->right, CONSTANT, 2);
-            }
+            tree->NodCtor (iter->left->left, iter->left->left->left->type, iter->left->left->left->val, iter->left->left->left->left, iter->left->left->left->right, iter->left->left->left, 0, 1);
+            tree->NodCtor (iter->left->right, iter->left->right->right->type, iter->left->right->right->val, iter->left->right->right->left, iter->left->right->right->right, iter->left->right->right, 0, 1);
+            writeFuncTex (tree, outFile, varName);
+
+            recDiff (tree, iter->left->left->left, outFile, varName);
+            recDiff (tree, iter->left->right->right, outFile, varName);
         }
     }
     else {
 
         if (iter->type == X) {
 
-            tree->NodAddLeft (iter, CONSTANT, iter->val);
-            tree->NodAddRight (iter, X, iter->val - 1);
-            tree->NodCtor (iter->prev, MULT, 0, iter->left, iter->right, iter);
+            tree->NodMoveRight (iter, MULT, 0);
+            tree->NodAddLeft (iter, CONSTANT, iter->right->val);
+            tree->NodCtor (iter, X, iter->right->val - 1, NULL, NULL, iter->right);
         }
         else tree->NodCtor (iter->prev, CONSTANT, 0, NULL, NULL, iter);
     }
 }
 
-void writeTeX (Tree<Nod>* derivative, Nod* dIter, Tree<Nod>* func, Nod* fIter) {
+void writeFuncTex (Tree<Nod>* derivative, FILE* outFile, char varName) {
 
-    static int actionCounter = 0;
+    const char* transactions[TRANS_COUNT] = {"Очевидно, что:",
+                                    "На пятой лекции Знаменской доказывалось, что:",
+                                    "Если бы вы посещали вуз, вы бы знали, что:",
+                                    "Жак Фреско однажды сказал:",
+                                    "Если присмотреться, то можно заметить, что:",
+                                    "Пропущенные шаги оставим как упражнение для читателя",
+                                    "Ничто не точно, разве что:",
+                                    "Для тех, кто написал реферат по бжд должно быть очевидно, что:",
+                                    "Автору не очень хочется писать, как он получил все это, поэтому он просто напишет \"очевидным переходом получаем\":",
+                                    "И.Р. Дединский всегда говорил, что:",
+                                    "Дифференциатор сломался, поэтому предыдущие шаги были пропущены, тем не менее:",
+                                    "Ладно:",
+                                    "У внимательного читателя возникнет вопрос: \"почему так?\" Не очень внимательный автор отчета даст такой ответ: \"хз\" и напишет:",
+                                    "что?:"};
 
-    const char* fileName = "derivative.tex";
-    FILE* outFile  = fopen (fileName, "a");
+    if (rand() % 3 == 0) return;
 
-    if (actionCounter == 0) {
+    fprintf (outFile, "%s\\\\" "\n", transactions [rand () % TRANS_COUNT]);
+    fprintf (outFile, "$");
+    printFunc (outFile, derivative, derivative->getdata ());
+    fprintf (outFile, "$\\\\" "\n");
+}
 
-        fprintf (outFile, "\\documentclass[a4paper]{article}" "\n");
-        fprintf (outFile, "\\usepackage[a4paper,top=2cm,bottom=2cm,left=0.5cm,right=0.5cm,marginparwidth=1.75cm]{geometry}" "\n");
-        fprintf (outFile, "\\usepackage[]{graphicx}" "\n");
-        fprintf (outFile, "\\usepackage[]{wrapfig}" "\n");
-        fprintf (outFile, "\\usepackage[T2A]{fontenc}" "\n");
-        fprintf (outFile, "\\usepackage[utf8]{inputenc}" "\n");
-        fprintf (outFile, "\\usepackage[english, russian]{babel}" "\n");
-        fprintf (outFile, "\\usepackage[]{amsmath,amsfonts,amssymb,amsthm,mathtools}" "\n");
-        fprintf (outFile, "\\usepackage[]{wasysym}" "\n");
-        fprintf (outFile, "\\usepackage[]{float}" "\n");
-        fprintf (outFile, "\\usepackage{multicol}" "\n");
-        fprintf (outFile, "\\usepackage{mathtext}" "\n");
-        fprintf (outFile, "\\usepackage{amsmath}" "\n");
-        fprintf (outFile, "\\usepackage{amsfonts}" "\n");
-        fprintf (outFile, "\\usepackage{indentfirst}" "\n");
-        fprintf (outFile, "\\usepackage{longtable}" "\n");
-        fprintf (outFile, "\\usepackage{natbib}" "\n");
-        fprintf (outFile, "\\usepackage{mathrsfs}" "\n");
-        fprintf (outFile, "\\title{The legendary derivative}" "\n");
-        fprintf (outFile, "\\date{\\today}" "\n");
-        fprintf (outFile, "\\begin{document}" "\n");
-        fprintf (outFile, "\\maketitle" "\n");
+void printFunc (FILE* file, Tree<Nod>* tree, Nod* iter) {
+
+    if (iter == NULL) return;
+
+    if (iter->diff) fprintf (file, "(");
+
+    if (iter->type == DIV) fprintf (file, "\\frac{");
+
+    if (iter->type == MULT
+        and iter->left != NULL and iter->right != NULL and (iter->left->type == MINUS or iter->left->type == PLUS)) fprintf (file, "(");
+
+    if (iter->type == POWER and iter->left != NULL and iter->right != NULL and (iter->left->type == MINUS
+                                                                             or iter->left->type == PLUS
+                                                                             or iter->left->type == MULT
+                                                                             or iter->left->type == DIV
+                                                                             or iter->left->type == POWER)) fprintf (file, "(");
+    printFunc (file, tree, iter->left);
+
+    if ((iter->type == MULT)
+        and iter->left != NULL and iter->right != NULL and (iter->left->type == MINUS or iter->left->type == PLUS)) fprintf (file, ")");
+
+    if (iter->type == POWER and iter->left != NULL and iter->right != NULL and (iter->left->type == MINUS
+                                                                             or iter->left->type == PLUS
+                                                                             or iter->left->type == MULT
+                                                                             or iter->left->type == DIV
+                                                                             or iter->left->type == POWER)) fprintf (file, ")");
+
+    if (iter->type == CONSTANT) fprintf (file, "%d", iter->val);
+    else if (iter->type == X) {
+        fprintf (file, "x");
+        if (iter->val != 1) fprintf (file, "^{%d}", iter->val);
     }
+    else if (iter->type == PLUS) fprintf (file, "+");
+    else if (iter->type == MINUS) fprintf (file, "-");
+    else if (iter->type == MULT) fprintf (file, "*");
+    else if (iter->type == DIV) fprintf (file, "}{");
+    else if (iter->type == POWER) fprintf (file, "^{");
 
+    if (iter->type == MULT
+        and iter->right != NULL and (iter->right->type == MINUS or iter->right->type == PLUS)) fprintf (file, "(");
+
+
+
+    printFunc (file, tree, iter->right);
+
+    if (iter->type == MULT
+        and iter->right != NULL and (iter->right->type == MINUS or iter->right->type == PLUS)) fprintf (file, ")");
+
+
+
+    if (iter->type == POWER or iter->type == DIV) fprintf (file, "}");
+    if (iter->diff) fprintf (file, ")\\prime ");
 }
 
 Tree<Nod> GetG (char* function, const char varName) {

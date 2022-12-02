@@ -6,14 +6,14 @@ SRCS=main.cpp lib/flog.cpp diff/diff.cpp
 
 OBJ=$(SRCS:.cpp=.o)
 
-all: .dependencies
+all: .makefile_includes
 	make a.exe
 
-.dependencies: $(SRCS)
+.makefile_includes: $(SRCS)
 	rm -rf "$@"
 	$(CC) $(CFLAGS) -MM $^ > "$@"
 
-include .dependencies
+include .makefile_includes
 
 a.exe: $(OBJ)
 	$(CC) $(OBJ) $(CFLAGS) -o a.exe
@@ -25,10 +25,11 @@ clean:
 	rm -rf *.o *.exe*
 	rm -rf *png
 	rm -rf */*.o */*.exe*
+	rm -rf derivative.* *.dot
 	clear
 
 run:
 	make
 	./a
 
-.PHONY: clean run .dependencies
+.PHONY: clean run .makefile_includes
