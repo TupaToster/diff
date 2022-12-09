@@ -26,7 +26,7 @@ struct Nod {
 
     Nod*    prev    = NULL;
     NodType type    = BLANK;
-    int     val     = 0;
+    double  val     = 0;
     int     NodNum  = 0;
     int     diff    = 0;
     Nod*    left    = NULL;
@@ -241,12 +241,18 @@ class Tree {
             picprintf ("\t" "\"Nod_%d\":right -> \"Nod_%d\";\n", nod->NodNum, nod->right->NodNum);
             PrintConnections (nod->right, picSource);
         }
-        if (nod->prev != NULL) {
+        // uncomment for debug
+        // if (nod->prev != NULL) {
 
-            picprintf ("\t" "\"Nod_%d\":prev -> \"Nod_%d\";\n", nod->NodNum, nod->prev->NodNum);
-        }
+        //     picprintf ("\t" "\"Nod_%d\":prev -> \"Nod_%d\";\n", nod->NodNum, nod->prev->NodNum);
+        // }
 
         #undef picprintf
+    }
+
+    const char* nodName (NodType type) {
+
+        return NULL;
     }
 
     void PrintNod (ELEM_T* nod, int* NodNumber, int depth, FILE* picSource, int ranks[][MAX_RANKS + 1]) {
@@ -261,7 +267,7 @@ class Tree {
         ranks[depth][ranks[depth][0]] = *NodNumber;
 
         picprintf ("\t" "\"Nod_%d\" [shape = \"Mrecord\", style = \"filled\", fillcolor = \"#9feb83\", label = \"{ <prev> Prev = %p | Current = %p | type = %.4s | Value = %f |{ <left> Left = %p | <right> Right = %p} }\"]\n",
-                    *NodNumber, nod->prev, nod, &nod->type, (double) nod->val, nod->left, nod->right);
+                    *NodNumber, nod->prev, nod, nodName (nod->type), (double) nod->val, nod->left, nod->right);
 
         *NodNumber += 1;
         if (nod->left != NULL) {
@@ -424,6 +430,23 @@ class Tree {
 
     //Nod part
 
+    void setNod (ELEM_T* current, NodType type = BLANK, double val = 0, int NodNum = 0, int diff = 0) {
+
+        verifyHash ();
+        current->type = type;
+        current->val = val;
+        current->NodNum = NodNum;
+        current->diff = diff;
+        countHash ();
+    }
+
+    void setDiff (ELEM_T* current, int diff = 0) {
+
+        verifyHash ();
+        current->diff = diff;
+        countHash ();
+    }
+
     ELEM_T* NodCtor (ELEM_T* prev = NULL, NodType type = BLANK, double val = 0, ELEM_T* left = NULL, ELEM_T* right = NULL, ELEM_T* current = NULL, int NodNum = 0, int diff = 0) {
 
         errCheck ();
@@ -576,5 +599,12 @@ class Tree {
             NodRecCpy (src->right, dst->right);
         }
         countHash ();
+    }
+
+    int getTreeSize (ELEM_T* iter) {
+
+        assert (iter != NULL);
+        if (iter->left == NULL and iter->right == NULL) return 1;
+        return getTreeSize (iter->left) + getTreeSize (iter->right) + 1;
     }
 };

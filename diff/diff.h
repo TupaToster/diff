@@ -43,8 +43,12 @@ void killXZero (Tree<Nod>* tree, Nod* iter);
 
 void writeFuncTex (Tree<Nod>* derivative, FILE* outFile, char varName);
 
-void printFunc (FILE* file, Tree<Nod>* tree, Nod* iter);
+void printFunc (FILE* file, Tree<Nod>* tree, Nod* iter, bool longFunc = 0);
 
 void setDiffStatus (Tree<Nod>* tree, Nod* iter, int diff);
 
-void researchFunc (char* function, const char* fileName, char varName);
+void researchFunc (char* function, const char* fileName, char varName, double x0);
+
+void podstava (Tree<Nod>* tree, Nod* iter, double x0);
+
+double calc (Tree<Nod>* tree, Nod* iter, double x0);
