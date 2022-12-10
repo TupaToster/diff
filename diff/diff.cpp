@@ -54,6 +54,7 @@ void researchFunc (char* function, const char* fileName, char varName, double x0
                       "После некоторых очевиднейших преобразований получаем :\\\\" "\n"
                       "$f(%c) = ", varName);
     simplify (&func, func.getdata());
+    dump (func);
     printFunc (outFile, &func, func.getdata());
     fprintf (outFile, "$\\\\" "\n");
 
@@ -74,11 +75,11 @@ void researchFunc (char* function, const char* fileName, char varName, double x0
     fprintf (outFile, "$\\\\ \n");
 
     Tree<Nod> diff2 = differentiate (&diff1, outFile, varName);
+    dump (diff2);
 
     fprintf (outFile, "Имеем $f\\prime\\prime(%c) = ", varName);
     printFunc (outFile, &diff2, diff2.getdata ());
     fprintf (outFile, "$\\\\" "\n");
-    dump (diff2);
 
     fprintf (outFile, "\\section{Найдем первую и вторую производную в точке, а также саму функцию}" "\n");
 
@@ -112,7 +113,7 @@ void researchFunc (char* function, const char* fileName, char varName, double x0
     else fprintf (plot, "0]\n");
 
     fprintf (plot, "f2 = [");
-    for (double x = x0 - 1; x < x0 + 1; x += 0.01){
+    for (double x = x0 - 1; x < x0 + 1; x += 0.01) {
         if (!isnan (calc (&diff2, diff2.getdata (), x))) fprintf (plot, "%lg, ", calc (&diff2, diff2.getdata (), x));
         else fprintf (plot, "0, ");
     }
@@ -121,13 +122,44 @@ void researchFunc (char* function, const char* fileName, char varName, double x0
     else fprintf (plot, "0]\n");
 
     fprintf (plot, "plt.grid ()" "\n"
-                   "plt.plot (x, f, \'r\')" "\n"
-                   "plt.plot (x, f1, \'g\')" "\n"
-                   "plt.plot (x, f2, \'b\')" "\n"
-                   "plt.show ()" "\n");
+                   "plt.plot (x, f, \'r\', label=\'func\')" "\n"
+                   "plt.plot (x, f1, \'g\', label=\'first derivative\')" "\n"
+                   "plt.plot (x, f2, \'b\', label=\'second derivative\')" "\n"
+                   "plt.xlabel (\'x\')" "\n"
+                   "plt.ylabel (\'y\')" "\n"
+                   "plt.legend ()" "\n"
+                   "plt.savefig (\"graph.png\")" "\n");
 
     fclose (plot);
     system ("C:/Users/maxsi/AppData/Local/Microsoft/WindowsApps/python3.10.exe d:/los_projectados/diff/plotgen.py");
+
+    fprintf (outFile, "\\section{График}" "\n");
+    fprintf (outFile, "На данном графике в районе $\\pm 2$ от заданной точки указаны: \\\\" "\n"
+                      "Красный - сама функция \\\\" "\n"
+                      "Зеленый - первая производная \\\\" "\n"
+                      "Синий - вторая производная \\\\" "\n"
+                      "\\begin{figure}[H]" "\n"
+                      "\\centering" "\n"
+                      "\\includegraphics{graph.png}" "\n"
+                      "\\end{figure}");
+
+    fprintf (outFile, "\\section{Тэйлор в точке до o($x^7$)}" "\n"
+                      "Далее мы неиронично разложим функцию в ряд тэйлора в точке $x0 = %lg$: \\\\" "\n"
+                      "$f(x) = %lg", x0, calc (&func, func.getdata (), x0));
+
+    Tree<Nod> taylor;
+    taylor.NodRecCpy (func.getdata (), taylor.getdata ());
+
+    int fact = 1;
+    for (int i = 1; i < 8; i++) {
+
+        fact *= i;
+        taylor = differentiate (&taylor, outFile, varName, false);
+
+        fprintf (outFile, " + \\frac{%lg}{%d}(x-%lg)^{%d}", calc (&taylor, taylor.getdata (), x0), fact, x0, i);
+    }
+
+    fprintf (outFile, " + o(x^7)$" "\n");
 
     fprintf (outFile, "\\end{document}");
 }
@@ -136,11 +168,13 @@ double calc (Tree<Nod>* tree, Nod* iter, double x0) {
 
     if (iter->type == CONSTANT) return iter->val;
     else if (iter->type == X) return pow (x0, iter->val);
-    else if (iter->type == PLUS) return calc (tree, iter->left, x0) + calc (tree, iter->right, x0);
-    else if (iter->type == MINUS) return calc (tree, iter->left, x0) - calc (tree, iter->right, x0);
-    else if (iter->type == MULT) return calc (tree, iter->left, x0) * calc (tree, iter->right, x0);
-    else if (iter->type == DIV) return calc (tree, iter->left, x0) / calc (tree, iter->right, x0);
-    else return pow (calc (tree, iter->left, x0), calc (tree, iter->right, x0));
+    #define DEFCMD(name, priority, calc, diff, get) else if (iter->type == name) return calc ;
+
+    #include "../lib/codegen.h"
+
+    #undef DEFCMD
+
+    return NAN;
 }
 
 void podstava (Tree<Nod>* tree, Nod* iter, double x0) {
@@ -174,7 +208,6 @@ void simplify (Tree<Nod>* tree, Nod* iter) {
 
 void killConstants (Tree<Nod>* tree, Nod* iter) {
 
-    assert ((iter->left != NULL and iter->right != NULL) or (iter->left == NULL and iter->right == NULL));
     if (iter->left == NULL or iter->right == NULL) return;
 
     if (iter->left->type == CONSTANT and iter->right->type == CONSTANT) {
@@ -197,7 +230,7 @@ void killConstants (Tree<Nod>* tree, Nod* iter) {
                 tree->NodCtor (iter->prev, CONSTANT, iter->left->val / iter->right->val, iter->left, iter->right, iter);
                 break;
 
-            case POWER:
+            case POW:
                 tree->NodCtor (iter->prev, CONSTANT, pow (iter->left->val, iter->right->val), iter->left, iter->right, iter);
                 break;
 
@@ -215,7 +248,6 @@ void killConstants (Tree<Nod>* tree, Nod* iter) {
 
 void xPower (Tree<Nod>* tree, Nod* iter) {
 
-    assert ((iter->left != NULL and iter->right != NULL) or (iter->left == NULL and iter->right == NULL));
     if (iter->left == NULL or iter->right == NULL) return;
 
     if (iter->left->type != X or iter->right->type != X) return;
@@ -266,7 +298,6 @@ void xPower (Tree<Nod>* tree, Nod* iter) {
 
 void divByX (Tree<Nod>* tree, Nod* iter) {
 
-    assert ((iter->left != NULL and iter->right != NULL) or (iter->left == NULL and iter->right == NULL));
     if (iter->left == NULL or iter->right == NULL) return;
 
     if (iter->type == DIV and iter->right->type == X) {
@@ -278,10 +309,9 @@ void divByX (Tree<Nod>* tree, Nod* iter) {
 
 void deXPow (Tree<Nod>* tree, Nod* iter) {
 
-    assert ((iter->left != NULL and iter->right != NULL) or (iter->left == NULL and iter->right == NULL));
     if (iter->left == NULL or iter->right == NULL) return;
 
-    if (iter->left->type == X and iter->right->type == CONSTANT and iter->type == POWER) {
+    if (iter->left->type == X and iter->right->type == CONSTANT and iter->type == POW) {
 
         tree->NodCtor (iter->prev, X, iter->right->val * iter->left->val, iter->left, iter->right, iter);
 
@@ -292,7 +322,7 @@ void deXPow (Tree<Nod>* tree, Nod* iter) {
 
 void killNeutral (Tree<Nod>* tree, Nod* iter) {
 
-    assert ((iter->left != NULL and iter->right != NULL) or (iter->left == NULL and iter->right == NULL));
+    if (iter->left == NULL or iter->right == NULL) return;
     if (iter->type == PLUS) {
 
         if (iter->left->type == CONSTANT and iter->left->val == 0) {
@@ -335,7 +365,7 @@ void killNeutral (Tree<Nod>* tree, Nod* iter) {
             tree->NodCtor (iter->prev, CONSTANT, 0, NULL, NULL, iter);
         }
     }
-    else if (iter->type == POWER) {
+    else if (iter->type == POW) {
 
         if (iter->right->type == CONSTANT and iter->right->val == 0) {
 
@@ -354,18 +384,17 @@ void killNeutral (Tree<Nod>* tree, Nod* iter) {
 
 void killXZero (Tree<Nod>* tree, Nod* iter) {
 
-    assert ((iter->left != NULL and iter->right != NULL) or (iter->left == NULL and iter->right == NULL));
     if (iter->type == X and iter->val == 0) tree->NodCtor (iter->prev, CONSTANT, 1, NULL, NULL, iter);
 }
 
-Tree<Nod> differentiate (Tree<Nod>* tree, FILE* outFile, char varName) {
+Tree<Nod> differentiate (Tree<Nod>* tree, FILE* outFile, char varName, bool writeTex) {
 
     Tree<Nod> diff;
     diff.NodRecCpy (tree->getdata (), diff.getdata ());
     setDiffStatus (&diff, diff.getdata (), 1);
     setDiffStatus (&diff, diff.getdata ()->left, 0);
     setDiffStatus (&diff, diff.getdata ()->right, 0);
-    recDiff (&diff, diff.getdata (), outFile, varName);
+    recDiff (&diff, diff.getdata (), outFile, varName, writeTex);
     simplify (&diff, diff.getdata ());
     return diff;
 }
@@ -380,65 +409,38 @@ void setDiffStatus (Tree<Nod>* tree, Nod* iter, int diff) {
     setDiffStatus (tree, iter->right, diff);
 }
 
-void recDiff (Tree<Nod>* tree, Nod* iter, FILE* outFile, char varName) {
+void recDiff (Tree<Nod>* tree, Nod* iter, FILE* outFile, char varName, bool writeTex) {
 
     if (iter == NULL) return;
 
     tree->NodCtor (iter->prev, iter->type, iter->val, iter->left, iter->right, iter, 0, 0);
-    if (iter->left != NULL and iter->right != NULL) {
+    switch (iter->type) {
 
-        if (iter->type == PLUS or iter->type == MINUS) {
+        case CONSTANT:
 
-            tree->NodCtor (iter, iter->left->type, iter->left->val, iter->left->left, iter->left->right, iter->left, 0, 1);
-            tree->NodCtor (iter, iter->right->type, iter->right->val, iter->right->left, iter->right->right, iter->right, 0, 1);
-            writeFuncTex (tree, outFile, varName);
+            tree->setNod (iter, CONSTANT, 0);
+        break;
 
-            recDiff (tree, iter->left, outFile, varName);
-            recDiff (tree, iter->right, outFile, varName);
-        }
-        else if (iter->type == MULT) {
-
-            tree->NodMoveLeft (iter, PLUS, 0);
-            tree->NodAddRight (iter);
-            tree->NodRecCpy (iter->left, iter->right);
-
-            tree->NodCtor (iter->left, iter->left->left->type, iter->left->left->val, iter->left->left->left, iter->left->left->right, iter->left->left, 0, 1);
-            tree->NodCtor (iter->right, iter->right->right->type, iter->right->right->val, iter->right->right->left, iter->right->right->right, iter->right->right, 0, 1);
-            writeFuncTex (tree, outFile, varName);
-
-            recDiff (tree, iter->left->left, outFile, varName);
-            recDiff (tree, iter->right->right, outFile, varName);
-        }
-        else if (iter->type == DIV) {
-
-            tree->NodMoveLeft (iter, DIV, 0);
-            tree->NodAddRight (iter, POWER, 0);
-            tree->NodAddLeft (iter->right);
-            tree->NodAddRight (iter->right, CONSTANT, 2);
-            tree->NodRecCpy (iter->left->right, iter->right->left);
-
-            tree->NodCtor (iter, MULT, 0, iter->left->left, iter->left->right, iter->left);
-            tree->NodMoveLeft (iter->left, MINUS, 0);
-            tree->NodAddRight (iter->left);
-            tree->NodRecCpy (iter->left->left, iter->left->right);
-
-            tree->NodCtor (iter->left->left, iter->left->left->left->type, iter->left->left->left->val, iter->left->left->left->left, iter->left->left->left->right, iter->left->left->left, 0, 1);
-            tree->NodCtor (iter->left->right, iter->left->right->right->type, iter->left->right->right->val, iter->left->right->right->left, iter->left->right->right->right, iter->left->right->right, 0, 1);
-            writeFuncTex (tree, outFile, varName);
-
-            recDiff (tree, iter->left->left->left, outFile, varName);
-            recDiff (tree, iter->left->right->right, outFile, varName);
-        }
-    }
-    else {
-
-        if (iter->type == X) {
+        case X:
 
             tree->NodMoveRight (iter, MULT, 0);
             tree->NodAddLeft (iter, CONSTANT, iter->right->val);
             tree->NodCtor (iter, X, iter->right->val - 1, NULL, NULL, iter->right);
-        }
-        else tree->NodCtor (iter->prev, CONSTANT, 0, NULL, NULL, iter);
+        break;
+
+        #define DEFCMD(name, priotiy, calc, diff, get) case name: \
+                                                           diff   \
+                                                           break;
+
+        #include "../lib/codegen.h"
+
+        #undef DEFCMD
+
+        default:
+
+            printf ("Wrong node type with value: ", iter->type);
+            assert (iter->type == BLANK);
+        break;
     }
 }
 
@@ -484,20 +486,20 @@ void printFunc (FILE* file, Tree<Nod>* tree, Nod* iter, bool longFunc) {
     if (iter->type == DIV and longFunc == 0) fprintf (file, "\\frac{");
     else if ((iter->type == MULT or (iter->type == DIV and longFunc))
         and iter->left != NULL and iter->right != NULL and (iter->left->type == MINUS or iter->left->type == PLUS)) fprintf (file, "(");
-    else if (iter->type == POWER and iter->left != NULL and iter->right != NULL and (iter->left->type == MINUS
+    else if (iter->type == POW and iter->left != NULL and iter->right != NULL and (iter->left->type == MINUS
                                                                                 or iter->left->type == PLUS
                                                                                 or iter->left->type == MULT
                                                                                 or iter->left->type == DIV
-                                                                                or iter->left->type == POWER)) fprintf (file, "(");
+                                                                                or iter->left->type == POW)) fprintf (file, "(");
     printFunc (file, tree, iter->left);
 
     if ((iter->type == MULT or (iter->type == DIV and longFunc))
         and iter->left != NULL and iter->right != NULL and (iter->left->type == MINUS or iter->left->type == PLUS)) fprintf (file, ")");
-    else if (iter->type == POWER and iter->left != NULL and iter->right != NULL and (iter->left->type == MINUS
+    else if (iter->type == POW and iter->left != NULL and iter->right != NULL and (iter->left->type == MINUS
                                                                                 or iter->left->type == PLUS
                                                                                 or iter->left->type == MULT
                                                                                 or iter->left->type == DIV
-                                                                                or iter->left->type == POWER)) fprintf (file, ")");
+                                                                                or iter->left->type == POW)) fprintf (file, ")");
 
     if (iter->type == CONSTANT) fprintf (file, "%lg", iter->val);
     else if (iter->type == X) {
@@ -509,7 +511,7 @@ void printFunc (FILE* file, Tree<Nod>* tree, Nod* iter, bool longFunc) {
     else if (iter->type == MULT) fprintf (file, "*");
     else if (iter->type == DIV and longFunc == 0) fprintf (file, "}{");
     else if (iter->type == DIV and longFunc == 1) fprintf (file, "/");
-    else if (iter->type == POWER) fprintf (file, "^{");
+    else if (iter->type == POW) fprintf (file, "^{");
 
     if ((iter->type == MULT or (iter->type == DIV and longFunc))
         and iter->right != NULL and (iter->right->type == MINUS or iter->right->type == PLUS)) fprintf (file, "(");
@@ -520,7 +522,7 @@ void printFunc (FILE* file, Tree<Nod>* tree, Nod* iter, bool longFunc) {
 
     if ((iter->type == MULT or (iter->type == DIV and longFunc))
         and iter->right != NULL and (iter->right->type == MINUS or iter->right->type == PLUS)) fprintf (file, ")");
-    else if (iter->type == POWER or (iter->type == DIV and longFunc == 0)) fprintf (file, "}");
+    else if (iter->type == POW or (iter->type == DIV and longFunc == 0)) fprintf (file, "}");
     else if (iter->type == DIV and longFunc == 1) fprintf (file, ")");
     else if (iter->diff) fprintf (file, ")\\prime ");
 }
@@ -529,76 +531,15 @@ Tree<Nod> GetG (char* function, const char varName) {
 
     Tree<Nod> tree;
     char* s = function;
-    GetPlus (&s, &tree, tree.getdata (), varName);
+    Get_1 (&s, &tree, tree.getdata (), varName);
     assert (*s == '\0');
     return tree;
 }
 
-void GetPlus (char** s, Tree<Nod>* tree, Nod* iter, const char varName) {
+#define DEFCMD(name, priority, calc, diff, get) \
+    void Get_##priority (char** s, Tree<Nod>* tree, Nod* iter, const char varName)\
+    get
 
-    GetMult (s, tree, iter, varName);
+#include "../lib/codegen.h"
 
-    while (**s == '+' or **s == '-') {
-
-
-        tree->NodMoveLeft (iter);
-        tree->NodCtor (iter->prev, **s == '+' ? PLUS : MINUS, 0, iter->left, NULL, iter);
-        tree->NodAddRight (iter);
-        ++*s;
-        GetMult (s, tree, iter->right, varName);
-    }
-}
-
-void GetMult (char** s, Tree<Nod>* tree, Nod* iter, const char varName) {
-
-    GetPower (s, tree, iter, varName);
-
-    while (**s == '*' or **s == '/') {
-
-        tree->NodMoveLeft (iter);
-        tree->NodCtor (iter->prev, **s == '*' ? MULT : DIV, 0, iter->left, NULL, iter);
-        tree->NodAddRight (iter);
-        ++*s;
-        GetPower (s, tree, iter->right, varName);
-    }
-}
-
-void GetPower (char** s, Tree<Nod>* tree, Nod* iter, const char varName) {
-
-    GetP (s, tree, iter, varName);
-
-    while (**s == '^') {
-
-        tree->NodMoveLeft (iter);
-        tree->NodCtor (iter->prev, POWER, 0, iter->left, NULL, iter);
-        tree->NodAddRight (iter);
-        ++*s;
-        GetP (s, tree, iter->right, varName);
-    }
-}
-
-void GetP (char** s, Tree<Nod>* tree, Nod* iter, const char varName) {
-
-    if (**s == '(') {
-
-        ++*s;
-        GetPlus (s, tree, iter, varName);
-        assert (**s == ')');
-        ++*s;
-        return;
-    }
-    else GetNum (s, tree, iter, varName);
-}
-
-void GetNum (char** s, Tree<Nod>* tree, Nod* iter, const char varName) {
-
-    if (**s == varName) {
-
-        tree->NodCtor (iter->prev, X, 1, NULL, NULL, iter);
-        ++*s;
-        return;
-    }
-    assert (**s >= '0' and **s <= '9');
-    tree->NodCtor (iter->prev, CONSTANT, strtod (*s, s), NULL, NULL, iter);
-    return;
-}
+#undef DEFCMD

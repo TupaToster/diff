@@ -10,16 +10,19 @@
 #define dump(clas) ;
 #endif
 
+#define pasta(a) #a
+
 enum NodType {
 
-    BLANK    = 'KNLB',
-    CONSTANT = 'TSNC',
-    X        = 'X',
-    PLUS     = 'SULP',
-    MINUS    = 'NIM',
-    MULT     = 'TLUM',
-    DIV      = 'VID',
-    POWER    = 'WOP',
+    BLANK = 0,
+    CONSTANT = 1,
+    X = 2,
+    #define DEFCMD(name, priority, calc, diff, get) name = priority + 2,
+
+    #include "codegen.h"
+    
+
+    #undef DEFCMD
 };
 
 struct Nod {
@@ -43,7 +46,7 @@ class Tree {
     static constexpr unsigned short     POISON2   = 0xBDCF; ///< 2 byte Poison
     static constexpr unsigned int       POISON4   = 0xBADC0FEE; ///< 4 byte Poison
     static constexpr unsigned long long POISON8   = 0xBADC0FEEF04DED32; ///< 8 byte Poison
-    static constexpr unsigned int       MULT      = 37u; ///< Multiplier for hash
+    static constexpr unsigned int       HASH_MULT = 37u; ///< Multiplier for hash
     static constexpr unsigned int       MAX_RANKS = 100;
 
     enum errorCodes {
@@ -79,7 +82,7 @@ class Tree {
         for (; left < right; left++) {
 
             hash += ((unsigned int) * (char*) left) * (*multiplier);
-            *multiplier *= MULT;
+            *multiplier *= HASH_MULT;
         }
     }
 
@@ -164,6 +167,28 @@ class Tree {
     }
 
     // Nod part
+
+    const char* NodTypeStr (NodType type) {
+
+        switch (type) {
+
+            case BLANK: return "BLANK";
+
+            case CONSTANT: return "CONSTANT";
+
+            case X: return "X";
+
+            #define DEFCMD(name, priority, calc, diff, get) case name : return #name ;
+
+            #include "..\lib\codegen.h"
+
+            #undef DEFCMD
+
+            default:
+                printf ("%d\n", type);
+                return "UNKNOWN_TYPE";
+        }
+    }
 
     void TreeGraphDump () {
 
@@ -250,11 +275,6 @@ class Tree {
         #undef picprintf
     }
 
-    const char* nodName (NodType type) {
-
-        return NULL;
-    }
-
     void PrintNod (ELEM_T* nod, int* NodNumber, int depth, FILE* picSource, int ranks[][MAX_RANKS + 1]) {
 
         #define picprintf(...) fprintf (picSource, __VA_ARGS__)
@@ -266,8 +286,8 @@ class Tree {
         ranks[depth][0]++;
         ranks[depth][ranks[depth][0]] = *NodNumber;
 
-        picprintf ("\t" "\"Nod_%d\" [shape = \"Mrecord\", style = \"filled\", fillcolor = \"#9feb83\", label = \"{ <prev> Prev = %p | Current = %p | type = %.4s | Value = %f |{ <left> Left = %p | <right> Right = %p} }\"]\n",
-                    *NodNumber, nod->prev, nod, nodName (nod->type), (double) nod->val, nod->left, nod->right);
+        picprintf ("\t" "\"Nod_%d\" [shape = \"Mrecord\", style = \"filled\", fillcolor = \"#9feb83\", label = \"{ <prev> Prev = %p | Current = %p | type = %s | Value = %f |{ <left> Left = %p | <right> Right = %p} }\"]\n",
+                    *NodNumber, nod->prev, nod, NodTypeStr (nod->type), (double) nod->val, nod->left, nod->right);
 
         *NodNumber += 1;
         if (nod->left != NULL) {
@@ -604,7 +624,6 @@ class Tree {
     int getTreeSize (ELEM_T* iter) {
 
         assert (iter != NULL);
-        if (iter->left == NULL and iter->right == NULL) return 1;
-        return getTreeSize (iter->left) + getTreeSize (iter->right) + 1;
+        return iter->left == NULL ? 0 : getTreeSize (iter->left) + iter->right == NULL ? 0 : getTreeSize (iter->right) + 1;
     }
 };

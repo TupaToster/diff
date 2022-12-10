@@ -13,13 +13,11 @@
 
 Tree<Nod> GetG (char* function, const char varName);
 
-void GetPlus (char** s, Tree<Nod>* tree, Nod* iter, const char varName);
+#define DEFCMD(name, priority, calc, diff, get) void Get_##priority (char** s, Tree<Nod>* tree, Nod* iter, const char varName = 'x');
 
-void GetMult (char** s, Tree<Nod>* tree, Nod* iter, const char varName);
+#include "..\lib\codegen.h"
 
-void GetNum (char** s, Tree<Nod>* tree, Nod* iter, const char varName);
-
-void GetP (char** s, Tree<Nod>* tree, Nod* iter, const char varName);
+#undef DEFCMD
 
 void simplify (Tree<Nod>* tree, Nod* iter);
 
@@ -27,15 +25,13 @@ void killConstants (Tree<Nod>* tree, Nod* iter);
 
 void xPower (Tree<Nod>* tree, Nod* iter);
 
-void GetPower (char** s, Tree<Nod>* tree, Nod* iter, const char varName);
-
 void divByX (Tree<Nod>* tree, Nod* iter);
 
 void deXPow (Tree<Nod>* tree, Nod* iter);
 
-Tree<Nod> differentiate (Tree<Nod>* tree, FILE* outFile, char varName);
+Tree<Nod> differentiate (Tree<Nod>* tree, FILE* outFile, char varName, bool writeTex = true);
 
-void recDiff (Tree<Nod>* tree, Nod* iter, FILE* outFile, char varName);
+void recDiff (Tree<Nod>* tree, Nod* iter, FILE* outFile, char varName, bool writeTex = true);
 
 void killNeutral (Tree<Nod>* tree, Nod* iter);
 

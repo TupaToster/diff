@@ -1,5 +1,3 @@
-#define DEFCMD(name, priority, calc, diff, get) ;
-
 DEFCMD (PLUS, 1,
 {
 
@@ -7,12 +5,14 @@ DEFCMD (PLUS, 1,
 },
 {
 
+    assert (iter->left != NULL);
+    assert (iter->right != NULL);
     tree->setDiff (iter->left, 1);
     tree->setDiff (iter->right, 1);
-    writeFuncTex (tree, outFile, varName);
+    if (writeTex) writeFuncTex (tree, outFile, varName);
 
-    recDiff (tree, iter->left, outFile, varName);
-    recDiff (tree, iter->right, outFile, varName);
+    recDiff (tree, iter->left, outFile, varName, writeTex);
+    recDiff (tree, iter->right, outFile, varName, writeTex);
 },
 {
 
@@ -34,12 +34,15 @@ DEFCMD (MINUS, 2,
     calc (tree, iter->left, x0) - calc (tree, iter->right, x0)
 },
 {
+
+    assert (iter->left != NULL);
+    assert (iter->right != NULL);
     tree->setDiff (iter->left, 1);
     tree->setDiff (iter->right, 1);
-    writeFuncTex (tree, outFile, varName);
+    if (writeTex) writeFuncTex (tree, outFile, varName);
 
-    recDiff (tree, iter->left, outFile, varName);
-    recDiff (tree, iter->right, outFile, varName);
+    recDiff (tree, iter->left, outFile, varName, writeTex);
+    recDiff (tree, iter->right, outFile, varName, writeTex);
 },
 {
 
@@ -63,16 +66,18 @@ DEFCMD (MULT, 3,
 },
 {
 
+    assert (iter->left != NULL);
+    assert (iter->right != NULL);
     tree->NodMoveLeft (iter, PLUS, 0);
     tree->NodAddRight (iter);
     tree->NodRecCpy (iter->left, iter->right);
 
     tree->setDiff (iter->left->left, 1);
     tree->setDiff (iter->right->right, 1);
-    writeFuncTex (tree, outFile, varName);
+    if (writeTex) writeFuncTex (tree, outFile, varName);
 
-    recDiff (tree, iter->left->left, outFile, varName);
-    recDiff (tree, iter->right->right, outFile, varName);
+    recDiff (tree, iter->left->left, outFile, varName, writeTex);
+    recDiff (tree, iter->right->right, outFile, varName, writeTex);
 },
 {
 
@@ -95,8 +100,10 @@ DEFCMD (DIV, 4,
 },
 {
 
+    assert (iter->left != NULL);
+    assert (iter->right != NULL);
     tree->NodMoveLeft (iter, DIV, 0);
-    tree->NodAddRight (iter, POWER, 0);
+    tree->NodAddRight (iter, POW, 0);
     tree->NodAddLeft (iter->right);
     tree->NodAddRight (iter->right, CONSTANT, 2);
     tree->NodRecCpy (iter->left->right, iter->right->left);
@@ -107,11 +114,11 @@ DEFCMD (DIV, 4,
     tree->NodRecCpy (iter->left->left, iter->left->right);
 
     tree->setDiff (iter->left->left->left, 1);
-    tree->setDiff (iter->rleft->right->right, 1);
-    writeFuncTex (tree, outFile, varName);
+    tree->setDiff (iter->left->right->right, 1);
+    if (writeTex) writeFuncTex (tree, outFile, varName);
 
-    recDiff (tree, iter->left->left->left, outFile, varName);
-    recDiff (tree, iter->left->right->right, outFile, varName);
+    recDiff (tree, iter->left->left->left, outFile, varName, writeTex);
+    recDiff (tree, iter->left->right->right, outFile, varName, writeTex);
 },
 {
 
@@ -134,16 +141,23 @@ DEFCMD (POW, 5,
 },
 {
 
-    tree->NodMoveRight (iter, MULT);
-    tree->NodAddLeft (iter, LN);
-    tree->NodAddLeft (iter->left, CONSTANT, iter->right->left->val);
-    tree->NodMoveLeft (iter->right, MULT);
-    tree->NodAddRight (iter->right);
-    tree->NodRecCpy (iter->right->right, iter->right->left->right);
-    tree->setDiff (iter->right->right, 1);
-    writeFuncTex (tree, outFile, varName);
+    assert (iter->left != NULL);
+    assert (iter->right != NULL);
 
-    recDiff (tree, iter->right, right);
+    if (iter->left->type == CONSTANT) {
+
+        tree->NodMoveRight (iter, MULT);
+        tree->NodAddLeft (iter, LN);
+        tree->NodAddLeft (iter->left, CONSTANT, iter->right->left->val);
+        tree->NodMoveLeft (iter->right, MULT);
+        tree->NodAddRight (iter->right);
+        tree->NodRecCpy (iter->right->left->right, iter->right->right);
+    }
+
+    tree->setDiff (iter->right->right, 1);
+    if (writeTex) writeFuncTex (tree, outFile, varName);
+
+    recDiff (tree, iter->right->right, outFile, varName);
 },
 {
 
@@ -152,7 +166,7 @@ DEFCMD (POW, 5,
     while (**s == '^') {
 
         tree->NodMoveLeft (iter);
-        tree->NodCtor (iter->prev, POWER, 0, iter->left, NULL, iter);
+        tree->NodCtor (iter->prev, POW, 0, iter->left, NULL, iter);
         tree->NodAddRight (iter);
         ++*s;
         Get_6 (s, tree, iter->right, varName);
@@ -166,26 +180,57 @@ DEFCMD (LN, 6,
 },
 {
 
+    assert (iter->left != NULL);
+    assert (iter->right == NULL);
+
+    tree->NodCtor (iter->prev, iter->type, iter->val, NULL, iter->left, iter);
     tree->NodAddLeft (iter, CONSTANT, 1);
     tree->setNod (iter, DIV);
     tree->NodMoveLeft (iter, MULT);
     tree->NodAddRight (iter);
     tree->NodRecCpy (iter->left->right, iter->right);
     tree->setDiff (iter->right, 1);
-    writeFuncTex (tree, outFile, varName);
+    if (writeTex) writeFuncTex (tree, outFile, varName);
 
-    recDiff (tree, iter->right);
+    recDiff (tree, iter->right, outFile, varName, writeTex);
 },
 {
 
     if (strncmp (*s, "ln(", 3) == 0) {
 
         *s+=3;
-        tree->setNod (iter, LN, 0);
         tree->NodAddLeft (iter);
+        tree->setNod (iter, LN, 0);
         Get_1 (s, tree, iter->left, varName);
         assert (**s == ')');
         ++*s;
     }
-    else GetNum (s, tree, iter, varName);
+    else Get_7 (s, tree, iter, varName);
+})
+
+DEFCMD (BRACKETS, 7, {}, {},
+{
+
+    if (**s == '(') {
+
+        ++*s;
+        Get_1 (s, tree, iter, varName);
+        assert (**s == ')');
+        ++*s;
+    }
+    else Get_8 (s, tree, iter, varName);
+})
+
+DEFCMD (GETNUM, 8, {}, {},
+{
+
+    if (**s == varName) {
+
+        tree->NodCtor (iter->prev, X, 1, NULL, NULL, iter);
+        ++*s;
+        return;
+    }
+    assert (**s >= '0' and **s <= '9');
+    tree->NodCtor (iter->prev, CONSTANT, strtod (*s, s), NULL, NULL, iter);
+    return;
 })
