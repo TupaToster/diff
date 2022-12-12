@@ -15,14 +15,14 @@
 enum NodType {
 
     BLANK = 0,
-    CONSTANT = 1,
-    X = 2,
-    #define DEFCMD(name, priority, calc, diff, get) name = priority + 2,
+    #define DEFCMD(name, priority, sign, calc, diff, get) name = priority,
 
     #include "codegen.h"
-    
+
 
     #undef DEFCMD
+    CONSTANT = (int) (1<<30),
+    X = (int) ((1<<30) + 1)
 };
 
 struct Nod {
@@ -178,7 +178,7 @@ class Tree {
 
             case X: return "X";
 
-            #define DEFCMD(name, priority, calc, diff, get) case name : return #name ;
+            #define DEFCMD(name, priority, sign, calc, diff, get) case name : return #name ;
 
             #include "..\lib\codegen.h"
 

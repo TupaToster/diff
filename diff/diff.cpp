@@ -90,41 +90,63 @@ void researchFunc (char* function, const char* fileName, char varName, double x0
 
     FILE* plot = fopen ("plotgen.py", "w");
     assert (plot != NULL);
-    fprintf (plot, "import matplotlib.pyplot as plt" "\n");
+    fprintf (plot, "import matplotlib.pyplot as plt" "\n"
+                   "import numpy as np" "\n"
+                   "def ln(x):" "\n"
+                   "\t" "return np.log(x)" "\n");
 
-    fprintf (plot, "x = [");
-    for (double x = x0 - 1; x < x0 + 1; x += 0.01) fprintf (plot, "%lg, ", x);
-    fprintf (plot, "%lg]\n", x0 + 1);
+    fprintf (plot, "x = np.linspace (%lf - 10, %lf + 10, 1000)" "\n", x0, x0);
+    fprintf (plot, "y = ");
+    printFunc (plot, &func, func.getdata (), 1, 0);
+    fprintf (plot, "\n");
 
-    fprintf (plot, "f = [");
-    for (double x = x0 - 1; x < x0 + 1; x += 0.01) {
-        if (!isnan (calc (&func, func.getdata (), x))) fprintf (plot, "%lg, ", calc (&func, func.getdata (), x));
-        else fprintf (plot, "0, ");
-    }
-    if (!isnan (calc (&func, func.getdata (), x0 + 1))) fprintf (plot, "%lg]\n", calc (&func, func.getdata (), x0 + 1));
-    else fprintf (plot, "0]\n");
+    fprintf (plot, "plt.plot (x, y, \'r\', label = \'Функция\')" "\n");
 
-    fprintf (plot, "f1 = [");
-    for (double x = x0 - 1; x < x0 + 1; x += 0.01) {
-        if (!isnan (calc (&diff1, diff1.getdata (), x))) fprintf (plot, "%lg, ", calc (&diff1, diff1.getdata (), x));
-        else fprintf (plot, "0, ");
-    }
-    if (!isnan (calc (&diff1, diff1.getdata (), x0 + 1))) fprintf (plot, "%lg]\n", calc (&diff1, diff1.getdata (), x0 + 1));
-    else fprintf (plot, "0]\n");
+    fprintf (plot, "x = np.linspace (%lf - 10, %lf + 10, 1000)" "\n", x0, x0);
+    fprintf (plot, "y = ");
+    printFunc (plot, &diff1, diff1.getdata (), 1, 0);
+    fprintf (plot, "\n");
 
-    fprintf (plot, "f2 = [");
-    for (double x = x0 - 1; x < x0 + 1; x += 0.01) {
-        if (!isnan (calc (&diff2, diff2.getdata (), x))) fprintf (plot, "%lg, ", calc (&diff2, diff2.getdata (), x));
-        else fprintf (plot, "0, ");
-    }
+    fprintf (plot, "plt.plot (x, y, \'g\', label = \'Первая производная\')" "\n");
 
-    if (!isnan (calc (&diff2, diff2.getdata (), x0 + 1))) fprintf (plot, "%lg]\n", calc (&diff2, diff2.getdata (), x0 + 1));
-    else fprintf (plot, "0]\n");
+    fprintf (plot, "x = np.linspace (%lf - 10, %lf + 10, 1000)" "\n", x0, x0);
+    fprintf (plot, "y = ");
+    printFunc (plot, &diff2, diff2.getdata (), 1, 0);
+    fprintf (plot, "\n");
+
+    fprintf (plot, "plt.plot (x, y, \'b\', label = \'Вторая производная\')" "\n");
+
+
+    // fprintf (plot, "x = [");
+    // for (double x = x0 - 1; x < x0 + 1; x += 0.01) fprintf (plot, "%lg, ", x);
+    // fprintf (plot, "%lg]\n", x0 + 1);
+
+    // fprintf (plot, "f = [");
+    // for (double x = x0 - 1; x < x0 + 1; x += 0.01) {
+    //     if (!isnan (calc (&func, func.getdata (), x))) fprintf (plot, "%lg, ", calc (&func, func.getdata (), x));
+    //     else fprintf (plot, "0, ");
+    // }
+    // if (!isnan (calc (&func, func.getdata (), x0 + 1))) fprintf (plot, "%lg]\n", calc (&func, func.getdata (), x0 + 1));
+    // else fprintf (plot, "0]\n");
+
+    // fprintf (plot, "f1 = [");
+    // for (double x = x0 - 1; x < x0 + 1; x += 0.01) {
+    //     if (!isnan (calc (&diff1, diff1.getdata (), x))) fprintf (plot, "%lg, ", calc (&diff1, diff1.getdata (), x));
+    //     else fprintf (plot, "0, ");
+    // }
+    // if (!isnan (calc (&diff1, diff1.getdata (), x0 + 1))) fprintf (plot, "%lg]\n", calc (&diff1, diff1.getdata (), x0 + 1));
+    // else fprintf (plot, "0]\n");
+
+    // fprintf (plot, "f2 = [");
+    // for (double x = x0 - 1; x < x0 + 1; x += 0.01) {
+    //     if (!isnan (calc (&diff2, diff2.getdata (), x))) fprintf (plot, "%lg, ", calc (&diff2, diff2.getdata (), x));
+    //     else fprintf (plot, "0, ");
+    // }
+
+    // if (!isnan (calc (&diff2, diff2.getdata (), x0 + 1))) fprintf (plot, "%lg]\n", calc (&diff2, diff2.getdata (), x0 + 1));
+    // else fprintf (plot, "0]\n");
 
     fprintf (plot, "plt.grid ()" "\n"
-                   "plt.plot (x, f, \'r\', label=\'func\')" "\n"
-                   "plt.plot (x, f1, \'g\', label=\'first derivative\')" "\n"
-                   "plt.plot (x, f2, \'b\', label=\'second derivative\')" "\n"
                    "plt.xlabel (\'x\')" "\n"
                    "plt.ylabel (\'y\')" "\n"
                    "plt.legend ()" "\n"
@@ -134,7 +156,7 @@ void researchFunc (char* function, const char* fileName, char varName, double x0
     system ("C:/Users/maxsi/AppData/Local/Microsoft/WindowsApps/python3.10.exe d:/los_projectados/diff/plotgen.py");
 
     fprintf (outFile, "\\section{График}" "\n");
-    fprintf (outFile, "На данном графике в районе $\\pm 2$ от заданной точки указаны: \\\\" "\n"
+    fprintf (outFile, "На данном графике в районе $\\pm 10$ от заданной точки указаны: \\\\" "\n"
                       "Красный - сама функция \\\\" "\n"
                       "Зеленый - первая производная \\\\" "\n"
                       "Синий - вторая производная \\\\" "\n"
@@ -168,7 +190,7 @@ double calc (Tree<Nod>* tree, Nod* iter, double x0) {
 
     if (iter->type == CONSTANT) return iter->val;
     else if (iter->type == X) return pow (x0, iter->val);
-    #define DEFCMD(name, priority, calc, diff, get) else if (iter->type == name) return calc ;
+    #define DEFCMD(name, priority, sign, calc, diff, get) else if (iter->type == name) return calc ;
 
     #include "../lib/codegen.h"
 
@@ -428,7 +450,7 @@ void recDiff (Tree<Nod>* tree, Nod* iter, FILE* outFile, char varName, bool writ
             tree->NodCtor (iter, X, iter->right->val - 1, NULL, NULL, iter->right);
         break;
 
-        #define DEFCMD(name, priotiy, calc, diff, get) case name: \
+        #define DEFCMD(name, priotiy, sign, calc, diff, get) case name: \
                                                            diff   \
                                                            break;
 
@@ -465,15 +487,15 @@ void writeFuncTex (Tree<Nod>* derivative, FILE* outFile, char varName) {
 
     fprintf (outFile, "%s\\\\" "\n", transactions [rand () % TRANS_COUNT]);
     fprintf (outFile, "$");
-    printFunc (outFile, derivative, derivative->getdata ());
+    printFunc (outFile, derivative, derivative->getdata (), 0, 1);
     fprintf (outFile, "$\\\\" "\n");
 }
 
-void printFunc (FILE* file, Tree<Nod>* tree, Nod* iter, bool longFunc) {
+void printFunc (FILE* file, Tree<Nod>* tree, Nod* iter, bool longFunc, bool tex) {
 
     if (iter == NULL) return;
 
-    if (iter == tree->getdata ()) {
+    if (iter == tree->getdata () and longFunc == 0) {
 
         if (tree->getTreeSize (iter) >= 70) {
 
@@ -482,49 +504,28 @@ void printFunc (FILE* file, Tree<Nod>* tree, Nod* iter, bool longFunc) {
         else longFunc = 0;
     }
 
-    if (iter->diff) fprintf (file, "(");
-    if (iter->type == DIV and longFunc == 0) fprintf (file, "\\frac{");
-    else if ((iter->type == MULT or (iter->type == DIV and longFunc))
-        and iter->left != NULL and iter->right != NULL and (iter->left->type == MINUS or iter->left->type == PLUS)) fprintf (file, "(");
-    else if (iter->type == POW and iter->left != NULL and iter->right != NULL and (iter->left->type == MINUS
-                                                                                or iter->left->type == PLUS
-                                                                                or iter->left->type == MULT
-                                                                                or iter->left->type == DIV
-                                                                                or iter->left->type == POW)) fprintf (file, "(");
-    printFunc (file, tree, iter->left);
+    if (tex and iter->diff) fprintf (file, "(");
 
-    if ((iter->type == MULT or (iter->type == DIV and longFunc))
-        and iter->left != NULL and iter->right != NULL and (iter->left->type == MINUS or iter->left->type == PLUS)) fprintf (file, ")");
-    else if (iter->type == POW and iter->left != NULL and iter->right != NULL and (iter->left->type == MINUS
-                                                                                or iter->left->type == PLUS
-                                                                                or iter->left->type == MULT
-                                                                                or iter->left->type == DIV
-                                                                                or iter->left->type == POW)) fprintf (file, ")");
+    #define DEFCMD(name, priority, sign, calc, diff, out) if (iter->type == name) sign
 
-    if (iter->type == CONSTANT) fprintf (file, "%lg", iter->val);
-    else if (iter->type == X) {
-        fprintf (file, "x");
-        if (iter->val != 1) fprintf (file, "^{%lg}", iter->val);
+    #include "../lib/codegen.h"
+
+    #undef DEFCMD
+
+    if (iter->type == CONSTANT) {
+
+        fprintf (file, "%lg", iter->val);
     }
-    else if (iter->type == PLUS) fprintf (file, "+");
-    else if (iter->type == MINUS) fprintf (file, "-");
-    else if (iter->type == MULT) fprintf (file, "*");
-    else if (iter->type == DIV and longFunc == 0) fprintf (file, "}{");
-    else if (iter->type == DIV and longFunc == 1) fprintf (file, "/");
-    else if (iter->type == POW) fprintf (file, "^{");
+    else if (iter->type == X) {
 
-    if ((iter->type == MULT or (iter->type == DIV and longFunc))
-        and iter->right != NULL and (iter->right->type == MINUS or iter->right->type == PLUS)) fprintf (file, "(");
+        fprintf (file, "x");
+        if (iter->val != 1) {
+            if (tex) fprintf (file, "^{%lg}", iter->val);
+            else fprintf (file, "**(%lg)", iter->val);
+        }
+    }
 
-
-
-    printFunc (file, tree, iter->right);
-
-    if ((iter->type == MULT or (iter->type == DIV and longFunc))
-        and iter->right != NULL and (iter->right->type == MINUS or iter->right->type == PLUS)) fprintf (file, ")");
-    else if (iter->type == POW or (iter->type == DIV and longFunc == 0)) fprintf (file, "}");
-    else if (iter->type == DIV and longFunc == 1) fprintf (file, ")");
-    else if (iter->diff) fprintf (file, ")\\prime ");
+    if (tex and iter->diff) fprintf (file, ")\\prime");
 }
 
 Tree<Nod> GetG (char* function, const char varName) {
@@ -536,7 +537,7 @@ Tree<Nod> GetG (char* function, const char varName) {
     return tree;
 }
 
-#define DEFCMD(name, priority, calc, diff, get) \
+#define DEFCMD(name, priority, sign, calc, diff, get) \
     void Get_##priority (char** s, Tree<Nod>* tree, Nod* iter, const char varName)\
     get
 

@@ -13,7 +13,7 @@
 
 Tree<Nod> GetG (char* function, const char varName);
 
-#define DEFCMD(name, priority, calc, diff, get) void Get_##priority (char** s, Tree<Nod>* tree, Nod* iter, const char varName = 'x');
+#define DEFCMD(name, priority, sign, calc, diff, get) void Get_##priority (char** s, Tree<Nod>* tree, Nod* iter, const char varName = 'x');
 
 #include "..\lib\codegen.h"
 
@@ -39,7 +39,7 @@ void killXZero (Tree<Nod>* tree, Nod* iter);
 
 void writeFuncTex (Tree<Nod>* derivative, FILE* outFile, char varName);
 
-void printFunc (FILE* file, Tree<Nod>* tree, Nod* iter, bool longFunc = 0);
+void printFunc (FILE* file, Tree<Nod>* tree, Nod* iter, bool longFunc = 0, bool tex = 1);
 
 void setDiffStatus (Tree<Nod>* tree, Nod* iter, int diff);
 

@@ -1,6 +1,12 @@
 DEFCMD (PLUS, 1,
 {
 
+    printFunc (file, tree, iter->left, longFunc, tex);
+    fprintf (file, "+");
+    printFunc (file, tree, iter->right, longFunc, tex);
+},
+{
+
     calc (tree, iter->left, x0) + calc (tree, iter->right, x0)
 },
 {
@@ -29,6 +35,12 @@ DEFCMD (PLUS, 1,
 })
 
 DEFCMD (MINUS, 2,
+{
+
+    printFunc (file, tree, iter->left, longFunc, tex);
+    fprintf (file, "-");
+    printFunc (file, tree, iter->right, longFunc, tex);
+},
 {
 
     calc (tree, iter->left, x0) - calc (tree, iter->right, x0)
@@ -60,6 +72,18 @@ DEFCMD (MINUS, 2,
 })
 
 DEFCMD (MULT, 3,
+{
+
+    if (iter->left->type < iter->type) fprintf (file, "(");
+    printFunc (file, tree, iter->left, longFunc, tex);
+    if (iter->left->type < iter->type) fprintf (file, ")");
+
+    fprintf (file, "*");
+
+    if (iter->right->type < iter->type) fprintf (file, "(");
+    printFunc (file, tree, iter->right, longFunc, tex);
+    if (iter->right->type < iter->type) fprintf (file, ")");
+},
 {
 
     calc (tree, iter->left, x0) * calc (tree, iter->right, x0)
@@ -94,6 +118,29 @@ DEFCMD (MULT, 3,
 })
 
 DEFCMD (DIV, 4,
+{
+
+    if (longFunc) {
+
+        fprintf (file, "\\frac{");
+        printFunc (file, tree, iter->left, longFunc, tex);
+        fprintf (file, "}{");
+        printFunc (file, tree, iter->right, longFunc, tex);
+        fprintf (file, "}");
+    }
+    else {
+
+        if (iter->left->type < iter->type) fprintf (file, "(");
+        printFunc (file, tree, iter->left, longFunc, tex);
+        if (iter->left->type < iter->type) fprintf (file, ")");
+
+        fprintf (file, "/");
+
+        if (iter->right->type < iter->type) fprintf (file, "(");
+        printFunc (file, tree, iter->right, longFunc, tex);
+        if (iter->right->type < iter->type) fprintf (file, ")");
+    }
+},
 {
 
     calc (tree, iter->left, x0) / calc (tree, iter->right, x0)
@@ -137,6 +184,24 @@ DEFCMD (DIV, 4,
 DEFCMD (POW, 5,
 {
 
+        if (iter->left->type < iter->type) fprintf (file, "(");
+        printFunc (file, tree, iter->left, longFunc, tex);
+        if (iter->left->type < iter->type) fprintf (file, ")");
+
+        if (tex) {
+            fprintf (file, "^{");
+            printFunc (file, tree, iter->right, longFunc, tex);
+            fprintf (file, "}");
+        }
+        else {
+            fprintf (file, "**");
+            if (iter->right->type < iter->type) fprintf (file, "(");
+            printFunc (file, tree, iter->right, longFunc, tex);
+            if (iter->right->type < iter->type) fprintf (file, ")");
+        }
+},
+{
+
     pow (calc (tree, iter->left, x0), calc (tree, iter->right, x0))
 },
 {
@@ -176,6 +241,14 @@ DEFCMD (POW, 5,
 DEFCMD (LN, 6,
 {
 
+    fprintf (file, "ln(");
+
+    printFunc (file, tree, iter->left, longFunc, tex);
+
+    fprintf (file, ")");
+},
+{
+
     log (calc (tree, iter->left, x0))
 },
 {
@@ -208,7 +281,7 @@ DEFCMD (LN, 6,
     else Get_7 (s, tree, iter, varName);
 })
 
-DEFCMD (BRACKETS, 7, {}, {},
+DEFCMD (BRACKETS, 7, {}, {}, {},
 {
 
     if (**s == '(') {
@@ -221,7 +294,7 @@ DEFCMD (BRACKETS, 7, {}, {},
     else Get_8 (s, tree, iter, varName);
 })
 
-DEFCMD (GETNUM, 8, {}, {},
+DEFCMD (GETNUM, 8, {}, {}, {},
 {
 
     if (**s == varName) {

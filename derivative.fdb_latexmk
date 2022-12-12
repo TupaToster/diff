@@ -1,11 +1,11 @@
 # Fdb version 3
-["pdflatex"] 1670703585 "d:/los_projectados/diff/derivative.tex" "derivative.pdf" "derivative" 1670703587
+["pdflatex"] 1670857316 "d:/los_projectados/diff/derivative.tex" "derivative.pdf" "derivative" 1670857318
   "c:/Users/maxsi/.texlive2022/texmf-var/fonts/tfm/lh/lh-t2a/labx1440.tfm" 1663756006 3304 6a543c07045572737981351171e0505e ""
   "c:/Users/maxsi/.texlive2022/texmf-var/fonts/tfm/lh/lh-t2a/larm1000.tfm" 1663755993 3220 0e417eaf233b160335902e97259a6c77 ""
   "c:/Users/maxsi/.texlive2022/texmf-var/fonts/tfm/lh/lh-t2a/larm1200.tfm" 1663755997 3240 c2435f2b5cd66d4930bc29b8df87967e ""
   "c:/Users/maxsi/.texlive2022/texmf-var/fonts/tfm/lh/lh-t2a/larm1440.tfm" 1663756004 3256 3daaa33cf35cf3f354983aa3214ecd7f ""
   "c:/Users/maxsi/.texlive2022/texmf-var/fonts/tfm/lh/lh-t2a/larm1728.tfm" 1663755995 3252 3140686608bdcae603a09a7973fb9e55 ""
-  "d:/los_projectados/diff/derivative.tex" 1670703527 3147 7fbac0d63dce3022c15dbef9013da6e8 ""
+  "d:/los_projectados/diff/derivative.tex" 1670857305 4164 fee4a45cc43b1403eb4e14ef0c3d65c4 ""
   "d:/texlive/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t2a.enc" 1663708404 3141 82d5616418ed8d5de703b3951bedecb4 ""
   "d:/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1663713562 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "d:/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1663705609 1004 54797486969f23fa377b128694d548df ""
@@ -101,9 +101,9 @@
   "d:/texlive/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1663754970 4635059 15022d94044b18a6cc9d30af1d6ffaa4 ""
   "d:/texlive/texmf-var/web2c/pdftex/pdflatex.fmt" 1663752380 3058725 5c05d2c6ec1a4ecdba5a7945f94a5d36 ""
   "d:/texlive/texmf.cnf" 1663752120 755 639003dd4ad18b875b8369800f2abbde ""
-  "derivative.aux" 1670703587 977 2a02f5a1356f93e2e393daa4c59a5b9d "pdflatex"
-  "derivative.tex" 1670703527 3147 7fbac0d63dce3022c15dbef9013da6e8 ""
-  "graph.png" 1670703527 32478 85e7214bef9972352ca4a6ee4d98836b ""
+  "derivative.aux" 1670857318 977 8d466910fdbd2cf4018503d4ce8606de "pdflatex"
+  "derivative.tex" 1670857305 4164 fee4a45cc43b1403eb4e14ef0c3d65c4 ""
+  "graph.png" 1670857304 25388 cbdf8e2985199e7b4365f564d42dda15 ""
   (generated)
   "derivative.aux"
   "derivative.log"
