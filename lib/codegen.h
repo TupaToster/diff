@@ -24,7 +24,7 @@ DEFCMD (PLUS, 1,
 
     Get_2 (s, tree, iter, varName);
 
-    while (**s == '+') {
+    while (**skipSpaces (s) == '+') {
 
         tree->NodMoveLeft (iter);
         tree->NodCtor (iter->prev, PLUS, 0, iter->left, NULL, iter);
@@ -60,7 +60,7 @@ DEFCMD (MINUS, 2,
 
     Get_3 (s, tree, iter, varName);
 
-    while (**s == '-') {
+    while (**skipSpaces (s) == '-') {
 
 
         tree->NodMoveLeft (iter);
@@ -107,7 +107,7 @@ DEFCMD (MULT, 3,
 
     Get_4 (s, tree, iter, varName);
 
-    while (**s == '*') {
+    while (**skipSpaces (s) == '*') {
 
         tree->NodMoveLeft (iter);
         tree->NodCtor (iter->prev, MULT, 0, iter->left, NULL, iter);
@@ -171,7 +171,7 @@ DEFCMD (DIV, 4,
 
     Get_5 (s, tree, iter, varName);
 
-    while (**s == '/') {
+    while (**skipSpaces (s) == '/') {
 
         tree->NodMoveLeft (iter);
         tree->NodCtor (iter->prev, DIV, 0, iter->left, NULL, iter);
@@ -228,7 +228,7 @@ DEFCMD (POW, 5,
 
     Get_6 (s, tree, iter, varName);
 
-    while (**s == '^') {
+    while (**skipSpaces (s) == '^') {
 
         tree->NodMoveLeft (iter);
         tree->NodCtor (iter->prev, POW, 0, iter->left, NULL, iter);
@@ -241,7 +241,8 @@ DEFCMD (POW, 5,
 DEFCMD (LN, 6,
 {
 
-    fprintf (file, "ln(");
+    if (tex) fprintf (file, "ln(");
+    else fprintf (file, "np.log(");
 
     printFunc (file, tree, iter->left, longFunc, tex);
 
@@ -269,35 +270,120 @@ DEFCMD (LN, 6,
 },
 {
 
-    if (strncmp (*s, "ln(", 3) == 0) {
+    if (strncmp (*skipSpaces (s), "ln", strlen ("ln")) == 0) {
 
-        *s+=3;
+        *s += strlen ("ln");
+        assert (**skipSpaces (s) == '(');
+        ++*s;
         tree->NodAddLeft (iter);
         tree->setNod (iter, LN, 0);
         Get_1 (s, tree, iter->left, varName);
-        assert (**s == ')');
+        assert (**skipSpaces (s) == ')');
         ++*s;
     }
     else Get_7 (s, tree, iter, varName);
 })
 
-DEFCMD (BRACKETS, 7, {}, {}, {},
+DEFCMD (SIN, 7,
 {
 
-    if (**s == '(') {
+    if (tex) fprintf (file, "sin(");
+    else fprintf (file, "np.sin(");
+    printFunc (file, tree, iter->left, longFunc, tex);
+    fprintf (file, ")");
+},
+{
 
+    sin (calc (tree, iter->left, x0))
+},
+{
+
+    assert (iter->left != NULL);
+    assert (iter->right == NULL);
+
+    tree->NodMoveLeft (iter, MULT);
+    tree->setNod (iter->left, COS);
+    tree->NodAddRight (iter);
+    tree->NodRecCpy (iter->left->left, iter->right);
+    tree->setDiff (iter->right, 1);
+    if (writeTex) writeFuncTex (tree, outFile, varName);
+
+    recDiff (tree, iter->right, outFile, varName, writeTex);
+},
+{
+
+    if (strncmp (*skipSpaces (s), "sin", strlen ("sin")) == 0) {
+
+        *s += strlen ("sin");
+        assert (**skipSpaces (s) == '(');
         ++*s;
-        Get_1 (s, tree, iter, varName);
-        assert (**s == ')');
+        tree->NodAddLeft (iter);
+        tree->setNod (iter, SIN, 0);
+        Get_1 (s, tree, iter->left, varName);
+        assert (**skipSpaces (s) == ')');
         ++*s;
     }
     else Get_8 (s, tree, iter, varName);
 })
 
-DEFCMD (GETNUM, 8, {}, {}, {},
+DEFCMD (COS, 8,
 {
 
-    if (**s == varName) {
+    if (tex) fprintf (file, "cos(");
+    else fprintf (file, "np.cos(");
+    printFunc (file, tree, iter->left, longFunc, tex);
+    fprintf (file, ")");
+},
+{
+
+    cos (calc (tree, iter->left, x0))
+},
+{
+
+    tree->NodMoveLeft (iter, MULT);
+    tree->NodAddRight (iter);
+    tree->NodRecCpy (iter->left->left, iter->right);
+    tree->setNod (iter->left, COS);
+    tree->NodMoveRight (iter->left, MINUS);
+    tree->NodAddLeft (iter->left, CONSTANT, 0);
+    tree->setDiff (iter->right, 1);
+    if (writeTex) writeFuncTex (tree, outFile, varName);
+
+    recDiff (tree, iter->right, outFile, varName, writeTex);
+},
+{
+
+    if (strncmp (*skipSpaces (s), "cos", strlen ("cos")) == 0) {
+
+        *s += strlen ("cos");
+        assert (**skipSpaces (s) == '(');
+        ++*s;
+        tree->NodAddLeft (iter);
+        tree->setNod (iter, SIN, 0);
+        Get_1 (s, tree, iter->left, varName);
+        assert (**skipSpaces (s) == ')');
+        ++*s;
+    }
+    else Get_9 (s, tree, iter, varName);
+})
+
+DEFCMD (BRACKETS, 9, {}, {}, {},
+{
+
+    if (**skipSpaces (s) == '(') {
+
+        ++*s;
+        Get_1 (s, tree, iter, varName);
+        assert (**skipSpaces (s) == ')');
+        ++*s;
+    }
+    else Get_10 (s, tree, iter, varName);
+})
+
+DEFCMD (GETNUM, 10, {}, {}, {},
+{
+
+    if (**skipSpaces (s) == varName) {
 
         tree->NodCtor (iter->prev, X, 1, NULL, NULL, iter);
         ++*s;

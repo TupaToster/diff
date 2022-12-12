@@ -48,3 +48,5 @@ void researchFunc (char* function, const char* fileName, char varName, double x0
 void podstava (Tree<Nod>* tree, Nod* iter, double x0);
 
 double calc (Tree<Nod>* tree, Nod* iter, double x0);
+
+char** skipSpaces (char**s);

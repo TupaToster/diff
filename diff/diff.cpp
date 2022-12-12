@@ -1,5 +1,16 @@
 #include "diff.h"
 
+char** skipSpaces (char** s) {
+
+    assert (s != NULL);
+    assert (*s != NULL);
+
+    while (**s == ' ' or **s == '\t' or **s == '\n') {
+        ++*s;
+        assert (**s != '\0');
+    }
+    return s;
+}
 
 void researchFunc (char* function, const char* fileName, char varName, double x0) {
 
@@ -49,6 +60,7 @@ void researchFunc (char* function, const char* fileName, char varName, double x0
     Tree<Nod> func = GetG (function, varName);
     fprintf (outFile, "На операционном столе сегодня находится следующая функция:\\\\" "\n"
                        "$f(%c) = ", varName);
+    dump (func);
     printFunc (outFile, &func, func.getdata ());
     fprintf (outFile, "$\\\\" "\n"
                       "После некоторых очевиднейших преобразований получаем :\\\\" "\n"
@@ -91,9 +103,7 @@ void researchFunc (char* function, const char* fileName, char varName, double x0
     FILE* plot = fopen ("plotgen.py", "w");
     assert (plot != NULL);
     fprintf (plot, "import matplotlib.pyplot as plt" "\n"
-                   "import numpy as np" "\n"
-                   "def ln(x):" "\n"
-                   "\t" "return np.log(x)" "\n");
+                   "import numpy as np" "\n");
 
     fprintf (plot, "x = np.linspace (%lf - 10, %lf + 10, 1000)" "\n", x0, x0);
     fprintf (plot, "y = ");
@@ -116,41 +126,11 @@ void researchFunc (char* function, const char* fileName, char varName, double x0
 
     fprintf (plot, "plt.plot (x, y, \'b\', label = \'Вторая производная\')" "\n");
 
-
-    // fprintf (plot, "x = [");
-    // for (double x = x0 - 1; x < x0 + 1; x += 0.01) fprintf (plot, "%lg, ", x);
-    // fprintf (plot, "%lg]\n", x0 + 1);
-
-    // fprintf (plot, "f = [");
-    // for (double x = x0 - 1; x < x0 + 1; x += 0.01) {
-    //     if (!isnan (calc (&func, func.getdata (), x))) fprintf (plot, "%lg, ", calc (&func, func.getdata (), x));
-    //     else fprintf (plot, "0, ");
-    // }
-    // if (!isnan (calc (&func, func.getdata (), x0 + 1))) fprintf (plot, "%lg]\n", calc (&func, func.getdata (), x0 + 1));
-    // else fprintf (plot, "0]\n");
-
-    // fprintf (plot, "f1 = [");
-    // for (double x = x0 - 1; x < x0 + 1; x += 0.01) {
-    //     if (!isnan (calc (&diff1, diff1.getdata (), x))) fprintf (plot, "%lg, ", calc (&diff1, diff1.getdata (), x));
-    //     else fprintf (plot, "0, ");
-    // }
-    // if (!isnan (calc (&diff1, diff1.getdata (), x0 + 1))) fprintf (plot, "%lg]\n", calc (&diff1, diff1.getdata (), x0 + 1));
-    // else fprintf (plot, "0]\n");
-
-    // fprintf (plot, "f2 = [");
-    // for (double x = x0 - 1; x < x0 + 1; x += 0.01) {
-    //     if (!isnan (calc (&diff2, diff2.getdata (), x))) fprintf (plot, "%lg, ", calc (&diff2, diff2.getdata (), x));
-    //     else fprintf (plot, "0, ");
-    // }
-
-    // if (!isnan (calc (&diff2, diff2.getdata (), x0 + 1))) fprintf (plot, "%lg]\n", calc (&diff2, diff2.getdata (), x0 + 1));
-    // else fprintf (plot, "0]\n");
-
     fprintf (plot, "plt.grid ()" "\n"
                    "plt.xlabel (\'x\')" "\n"
                    "plt.ylabel (\'y\')" "\n"
                    "plt.legend ()" "\n"
-                   "plt.savefig (\"graph.png\")" "\n");
+                   "plt.savefig (\"graph.png\", dpi = 500)" "\n");
 
     fclose (plot);
     system ("C:/Users/maxsi/AppData/Local/Microsoft/WindowsApps/python3.10.exe d:/los_projectados/diff/plotgen.py");

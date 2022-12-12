@@ -1,86 +1,69 @@
-digraph List_2 {
+digraph List_3 {
 	graph [dpi = 100];
 	rankdir = TB
-	"Nod_0" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000000000000000 | Current = 000002acad917394 | type = PLUS | Value = 0.000000 |{ <left> Left = 000002acad9173d0 | <right> Right = 000002acad917350} }"]
-	"Nod_1" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917394 | Current = 000002acad9173d0 | type = PLUS | Value = 0.000000 |{ <left> Left = 000002acad917250 | <right> Right = 000002acad917590} }"]
-	"Nod_2" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad9173d0 | Current = 000002acad917250 | type = MULT | Value = 0.000000 |{ <left> Left = 000002acad9174d0 | <right> Right = 000002acad917550} }"]
-	"Nod_3" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917250 | Current = 000002acad9174d0 | type = MULT | Value = 0.000000 |{ <left> Left = 000002acad917910 | <right> Right = 000002acad917850} }"]
-	"Nod_4" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad9174d0 | Current = 000002acad917910 | type = CONSTANT | Value = -1.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_5" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad9174d0 | Current = 000002acad917850 | type = X | Value = -2.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_6" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917250 | Current = 000002acad917550 | type = POW | Value = 0.000000 |{ <left> Left = 000002acad917410 | <right> Right = 000002acad917650} }"]
-	"Nod_7" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917550 | Current = 000002acad917410 | type = CONSTANT | Value = 12.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_8" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917550 | Current = 000002acad917650 | type = X | Value = 1.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_9" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad9173d0 | Current = 000002acad917590 | type = MULT | Value = 0.000000 |{ <left> Left = 000002acad917810 | <right> Right = 000002acad9175d0} }"]
-	"Nod_10" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917590 | Current = 000002acad917810 | type = X | Value = -1.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_11" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917590 | Current = 000002acad9175d0 | type = MULT | Value = 0.000000 |{ <left> Left = 000002acad9172d0 | <right> Right = 000002acad917290} }"]
-	"Nod_12" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad9175d0 | Current = 000002acad9172d0 | type = LN | Value = 0.000000 |{ <left> Left = 000002acad9188a0 | <right> Right = 0000000000000000} }"]
-	"Nod_13" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad9172d0 | Current = 000002acad9188a0 | type = CONSTANT | Value = 12.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_14" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad9175d0 | Current = 000002acad917290 | type = POW | Value = 0.000000 |{ <left> Left = 000002acad917610 | <right> Right = 000002acad917690} }"]
-	"Nod_15" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917290 | Current = 000002acad917610 | type = CONSTANT | Value = 12.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_16" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917290 | Current = 000002acad917690 | type = X | Value = 1.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_17" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917394 | Current = 000002acad917350 | type = PLUS | Value = 0.000000 |{ <left> Left = 000002acad918920 | <right> Right = 000002acad918260} }"]
-	"Nod_18" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917350 | Current = 000002acad918920 | type = MULT | Value = 0.000000 |{ <left> Left = 000002acad917710 | <right> Right = 000002acad917750} }"]
-	"Nod_19" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad918920 | Current = 000002acad917710 | type = X | Value = -1.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_20" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad918920 | Current = 000002acad917750 | type = MULT | Value = 0.000000 |{ <left> Left = 000002acad9178d0 | <right> Right = 000002acad917510} }"]
-	"Nod_21" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917750 | Current = 000002acad9178d0 | type = LN | Value = 0.000000 |{ <left> Left = 000002acad917790 | <right> Right = 0000000000000000} }"]
-	"Nod_22" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad9178d0 | Current = 000002acad917790 | type = CONSTANT | Value = 12.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_23" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917750 | Current = 000002acad917510 | type = POW | Value = 0.000000 |{ <left> Left = 000002acad9177d0 | <right> Right = 000002acad917490} }"]
-	"Nod_24" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917510 | Current = 000002acad9177d0 | type = CONSTANT | Value = 12.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_25" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917510 | Current = 000002acad917490 | type = X | Value = 1.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_26" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917350 | Current = 000002acad918260 | type = MULT | Value = 0.000000 |{ <left> Left = 000002acad9188e0 | <right> Right = 000002acad917a20} }"]
-	"Nod_27" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad918260 | Current = 000002acad9188e0 | type = LN | Value = 0.000000 |{ <left> Left = 000002acad917ca0 | <right> Right = 0000000000000000} }"]
-	"Nod_28" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad9188e0 | Current = 000002acad917ca0 | type = X | Value = 1.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_29" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad918260 | Current = 000002acad917a20 | type = MULT | Value = 0.000000 |{ <left> Left = 000002acad9185e0 | <right> Right = 000002acad917c20} }"]
-	"Nod_30" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917a20 | Current = 000002acad9185e0 | type = LN | Value = 0.000000 |{ <left> Left = 000002acad918460 | <right> Right = 0000000000000000} }"]
-	"Nod_31" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad9185e0 | Current = 000002acad918460 | type = CONSTANT | Value = 12.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_32" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917a20 | Current = 000002acad917c20 | type = MULT | Value = 0.000000 |{ <left> Left = 000002acad9182a0 | <right> Right = 000002acad917da0} }"]
-	"Nod_33" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917c20 | Current = 000002acad9182a0 | type = LN | Value = 0.000000 |{ <left> Left = 000002acad917c60 | <right> Right = 0000000000000000} }"]
-	"Nod_34" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad9182a0 | Current = 000002acad917c60 | type = CONSTANT | Value = 12.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_35" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917c20 | Current = 000002acad917da0 | type = POW | Value = 0.000000 |{ <left> Left = 000002acad9187a0 | <right> Right = 000002acad917ee0} }"]
-	"Nod_36" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917da0 | Current = 000002acad9187a0 | type = CONSTANT | Value = 12.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
-	"Nod_37" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 000002acad917da0 | Current = 000002acad917ee0 | type = X | Value = 1.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_0" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 0000000000000000 | Current = 00000271210d7354 | type = PLUS | Value = 0.000000 |{ <left> Left = 00000271210d74d0 | <right> Right = 00000271210d7750} }"]
+	"Nod_1" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7354 | Current = 00000271210d74d0 | type = MULT | Value = 0.000000 |{ <left> Left = 00000271210d7650 | <right> Right = 00000271210d7690} }"]
+	"Nod_2" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d74d0 | Current = 00000271210d7650 | type = MULT | Value = 0.000000 |{ <left> Left = 00000271210d7310 | <right> Right = 00000271210d87a0} }"]
+	"Nod_3" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7650 | Current = 00000271210d7310 | type = MINUS | Value = 0.000000 |{ <left> Left = 00000271210d88e0 | <right> Right = 00000271210d7e60} }"]
+	"Nod_4" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7310 | Current = 00000271210d88e0 | type = CONSTANT | Value = 0.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_5" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7310 | Current = 00000271210d7e60 | type = COS | Value = 0.000000 |{ <left> Left = 00000271210d7490 | <right> Right = 0000000000000000} }"]
+	"Nod_6" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7e60 | Current = 00000271210d7490 | type = PLUS | Value = 0.000000 |{ <left> Left = 00000271210d7590 | <right> Right = 00000271210d7450} }"]
+	"Nod_7" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7490 | Current = 00000271210d7590 | type = MULT | Value = 0.000000 |{ <left> Left = 00000271210d7390 | <right> Right = 00000271210d7790} }"]
+	"Nod_8" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7590 | Current = 00000271210d7390 | type = CONSTANT | Value = 2.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_9" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7590 | Current = 00000271210d7790 | type = X | Value = 2.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_10" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7490 | Current = 00000271210d7450 | type = CONSTANT | Value = 14.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_11" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7650 | Current = 00000271210d87a0 | type = MULT | Value = 0.000000 |{ <left> Left = 00000271210d84e0 | <right> Right = 00000271210d87e0} }"]
+	"Nod_12" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d87a0 | Current = 00000271210d84e0 | type = CONSTANT | Value = 2.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_13" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d87a0 | Current = 00000271210d87e0 | type = MULT | Value = 0.000000 |{ <left> Left = 00000271210d86e0 | <right> Right = 00000271210d7d60} }"]
+	"Nod_14" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d87e0 | Current = 00000271210d86e0 | type = CONSTANT | Value = 2.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_15" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d87e0 | Current = 00000271210d7d60 | type = X | Value = 1.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_16" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d74d0 | Current = 00000271210d7690 | type = MULT | Value = 0.000000 |{ <left> Left = 00000271210d7810 | <right> Right = 00000271210d7210} }"]
+	"Nod_17" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7690 | Current = 00000271210d7810 | type = CONSTANT | Value = 2.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_18" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7690 | Current = 00000271210d7210 | type = MULT | Value = 0.000000 |{ <left> Left = 00000271210d7250 | <right> Right = 00000271210d7290} }"]
+	"Nod_19" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7210 | Current = 00000271210d7250 | type = CONSTANT | Value = 2.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_20" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7210 | Current = 00000271210d7290 | type = X | Value = 1.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_21" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7354 | Current = 00000271210d7750 | type = MULT | Value = 0.000000 |{ <left> Left = 00000271210d7510 | <right> Right = 00000271210d7850} }"]
+	"Nod_22" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7750 | Current = 00000271210d7510 | type = COS | Value = 0.000000 |{ <left> Left = 00000271210d7550 | <right> Right = 0000000000000000} }"]
+	"Nod_23" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7510 | Current = 00000271210d7550 | type = PLUS | Value = 0.000000 |{ <left> Left = 00000271210d75d0 | <right> Right = 00000271210d77d0} }"]
+	"Nod_24" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7550 | Current = 00000271210d75d0 | type = MULT | Value = 0.000000 |{ <left> Left = 00000271210d7610 | <right> Right = 00000271210d7710} }"]
+	"Nod_25" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d75d0 | Current = 00000271210d7610 | type = CONSTANT | Value = 2.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_26" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d75d0 | Current = 00000271210d7710 | type = X | Value = 2.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_27" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7550 | Current = 00000271210d77d0 | type = CONSTANT | Value = 14.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
+	"Nod_28" [shape = "Mrecord", style = "filled", fillcolor = "#9feb83", label = "{ <prev> Prev = 00000271210d7750 | Current = 00000271210d7850 | type = CONSTANT | Value = 4.000000 |{ <left> Left = 0000000000000000 | <right> Right = 0000000000000000} }"]
 	{ rank = same;  Nod_0; }
-	{ rank = same;  Nod_1;  Nod_17; }
-	{ rank = same;  Nod_2;  Nod_9;  Nod_18;  Nod_26; }
-	{ rank = same;  Nod_3;  Nod_6;  Nod_10;  Nod_11;  Nod_19;  Nod_20;  Nod_27;  Nod_29; }
-	{ rank = same;  Nod_4;  Nod_5;  Nod_7;  Nod_8;  Nod_12;  Nod_14;  Nod_21;  Nod_23;  Nod_28;  Nod_30;  Nod_32; }
-	{ rank = same;  Nod_13;  Nod_15;  Nod_16;  Nod_22;  Nod_24;  Nod_25;  Nod_31;  Nod_33;  Nod_35; }
-	{ rank = same;  Nod_34;  Nod_36;  Nod_37; }
+	{ rank = same;  Nod_1;  Nod_21; }
+	{ rank = same;  Nod_2;  Nod_16;  Nod_22;  Nod_28; }
+	{ rank = same;  Nod_3;  Nod_11;  Nod_17;  Nod_18;  Nod_23; }
+	{ rank = same;  Nod_4;  Nod_5;  Nod_12;  Nod_13;  Nod_19;  Nod_20;  Nod_24;  Nod_27; }
+	{ rank = same;  Nod_6;  Nod_14;  Nod_15;  Nod_25;  Nod_26; }
+	{ rank = same;  Nod_7;  Nod_10; }
+	{ rank = same;  Nod_8;  Nod_9; }
 	"Nod_0":left -> "Nod_1";
 	"Nod_1":left -> "Nod_2";
 	"Nod_2":left -> "Nod_3";
 	"Nod_3":left -> "Nod_4";
 	"Nod_3":right -> "Nod_5";
-	"Nod_2":right -> "Nod_6";
+	"Nod_5":left -> "Nod_6";
 	"Nod_6":left -> "Nod_7";
-	"Nod_6":right -> "Nod_8";
-	"Nod_1":right -> "Nod_9";
-	"Nod_9":left -> "Nod_10";
-	"Nod_9":right -> "Nod_11";
+	"Nod_7":left -> "Nod_8";
+	"Nod_7":right -> "Nod_9";
+	"Nod_6":right -> "Nod_10";
+	"Nod_2":right -> "Nod_11";
 	"Nod_11":left -> "Nod_12";
-	"Nod_12":left -> "Nod_13";
-	"Nod_11":right -> "Nod_14";
-	"Nod_14":left -> "Nod_15";
-	"Nod_14":right -> "Nod_16";
-	"Nod_0":right -> "Nod_17";
-	"Nod_17":left -> "Nod_18";
+	"Nod_11":right -> "Nod_13";
+	"Nod_13":left -> "Nod_14";
+	"Nod_13":right -> "Nod_15";
+	"Nod_1":right -> "Nod_16";
+	"Nod_16":left -> "Nod_17";
+	"Nod_16":right -> "Nod_18";
 	"Nod_18":left -> "Nod_19";
 	"Nod_18":right -> "Nod_20";
-	"Nod_20":left -> "Nod_21";
+	"Nod_0":right -> "Nod_21";
 	"Nod_21":left -> "Nod_22";
-	"Nod_20":right -> "Nod_23";
+	"Nod_22":left -> "Nod_23";
 	"Nod_23":left -> "Nod_24";
-	"Nod_23":right -> "Nod_25";
-	"Nod_17":right -> "Nod_26";
-	"Nod_26":left -> "Nod_27";
-	"Nod_27":left -> "Nod_28";
-	"Nod_26":right -> "Nod_29";
-	"Nod_29":left -> "Nod_30";
-	"Nod_30":left -> "Nod_31";
-	"Nod_29":right -> "Nod_32";
-	"Nod_32":left -> "Nod_33";
-	"Nod_33":left -> "Nod_34";
-	"Nod_32":right -> "Nod_35";
-	"Nod_35":left -> "Nod_36";
-	"Nod_35":right -> "Nod_37";
+	"Nod_24":left -> "Nod_25";
+	"Nod_24":right -> "Nod_26";
+	"Nod_23":right -> "Nod_27";
+	"Nod_21":right -> "Nod_28";
 }

@@ -2,5 +2,5 @@
 
 int main (int argc, char* argv[]) {
 
-    researchFunc ("ln(x)*12^x", "derivative.tex", 'x', 2);
+    researchFunc ("sin (2*x^2 + 14)", "derivative.tex", 'x', 2);
 }

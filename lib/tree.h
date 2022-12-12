@@ -624,6 +624,6 @@ class Tree {
     int getTreeSize (ELEM_T* iter) {
 
         assert (iter != NULL);
-        return iter->left == NULL ? 0 : getTreeSize (iter->left) + iter->right == NULL ? 0 : getTreeSize (iter->right) + 1;
+        return (iter->left == NULL ? 0 : getTreeSize (iter->left)) + (iter->right == NULL ? 0 : getTreeSize (iter->right)) + 1;
     }
 };

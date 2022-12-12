@@ -6,6 +6,7 @@ SRCS=main.cpp lib/flog.cpp diff/diff.cpp
 
 OBJ=$(SRCS:.cpp=.o)
 
+
 all: .makefile_includes
 	make a.exe
 

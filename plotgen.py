@@ -1,18 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
-def ln(x):
-	return np.log(x)
 x = np.linspace (2.000000 - 10, 2.000000 + 10, 1000)
-y = ln(x)*12**x
+y = np.sin(2*x**(2)+14)
 plt.plot (x, y, 'r', label = 'Функция')
 x = np.linspace (2.000000 - 10, 2.000000 + 10, 1000)
-y = x**(-1)*12**x+ln(x)*ln(12)*12**x
+y = np.cos(2*x**(2)+14)*2*2*x
 plt.plot (x, y, 'g', label = 'Первая производная')
 x = np.linspace (2.000000 - 10, 2.000000 + 10, 1000)
-y = -1*x**(-2)*12**x+x**(-1)*ln(12)*12**x+x**(-1)*ln(12)*12**x+ln(x)*ln(12)*ln(12)*12**x
+y = (0-np.cos(2*x**(2)+14))*2*2*x*2*2*x+np.cos(2*x**(2)+14)*4
 plt.plot (x, y, 'b', label = 'Вторая производная')
 plt.grid ()
 plt.xlabel ('x')
 plt.ylabel ('y')
 plt.legend ()
-plt.savefig ("graph.png")
+plt.savefig ("graph.png", dpi = 500)
